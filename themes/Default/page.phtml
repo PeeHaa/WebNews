@@ -6,10 +6,43 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title><?= $this->translate('project.title'); ?></title>
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+        <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+        <link rel="manifest" href="/manifest.json">
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+        <meta name="theme-color" content="#ffffff">
         <link href="/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/css/font-awesome.min.css" rel="stylesheet">
+        <link href="/css/theme-fonts.css" rel="stylesheet">
+        <link href="/css/theme.css" rel="stylesheet">
     </head>
     <body>
+        <header class="site-header">
+            <div class="container">
+                <ul>
+                    <li><a href="/">#externals</a></li>
+                </ul>
+                <div class="account">
+                    <span class="fa fa-github"></span>
+                    <a href="/login" rel="nofollow"><?= $this->translate('nav.login'); ?></a>
+                    <span class="hidden-xs"><?= $this->translate('nav.login.subtext'); ?></span>
+                </div>
+            </div>
+        </header>
         <?= $content; ?>
+        <footer class="footer">
+            <div class="container">
+                <p>
+                    <?= $this->translate('footer.project'); ?>
+                    <a href="https://github.com/PeeHaa/WebNews" target="_blank">PeeHaa/WebNews</a>
+                </p>
+                <p>
+                    <?= $this->translate('footer.upstream'); ?>
+                    <a href="https://github.com/mnapoli/externals" target="_blank">mnapoli/externals</a>
+                </p>
+            </div>
+        </footer>
         <script src="/js/jquery-1.12.4.min.js"></script>
         <script src="/js/bootstrap.min.js"></script>
     </body>

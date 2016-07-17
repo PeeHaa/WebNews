@@ -1,0 +1,958 @@
+<?php declare(strict_types=1); ?>
+<div class="container">
+    <div class="page-header">
+        <h1>
+            <a href="/"><span class="fa fa-caret-left"></span></a>
+            [RFC] New operator for context-dependent escaping
+        </h1>
+    </div>
+    <section class="thread">
+
+        <article id="email-10621" class="clearfix unread">
+
+            <header>
+                <a href="#email-10621-body" role="button" data-toggle="collapse"><span class="fa fa-compress"></span></a>
+                <img class="avatar" src="https://secure.gravatar.com/avatar/d4d57572d4914514d4666d1f0f1c6b96?d=retro&amp;s=50" alt="Michael Vostrikov" title="Michael Vostrikov">
+                <span class="hidden-xs">Posted</span>
+                <a class="email-date" href="#email-10621" title="July 16, 2016 11:33">23 hours ago</a>
+                by <strong>Michael Vostrikov</strong>
+                <div class="label label-primary">unread</div>
+            </header>
+
+            <div id="email-10621-body" class="collapse in">
+                <div class="email-content">
+                    <p>Hello. <br>
+                        I have created RFC about context-dependent escaping operator. <br>
+                        <a href="https://wiki.php.net/rfc/escaping_operator" rel="nofollow" target="_blank">https://wiki.php.net/rfc/escaping_operator</a></p>
+                    <p>Initial discussion was here: <a href="http://marc.info/?t=146619199100001" rel="nofollow" target="_blank">http://marc.info/?t=146619199100001</a></p>
+                    <p>At first, I wanted to add a call of special function like <br>
+                        escaper_call($str, $context), which performs html-escaping by default and <br>
+                        can be replaced with a separate extension for extended work with contexts. <br>
+                        But then I figured out better variant.</p>
+                    <p>Main idea.</p>
+                    <p>Operator has the following form:</p>
+                    &lt;?* $str ?&gt;
+                    &lt;?* $str, 'html' ?&gt;
+                    &lt;?* $str, 'js | html' ?&gt;
+                    <p>Both expressions can be any type which can be converted to string. Second <br>
+                        expression is optional.</p>
+                    <p>I changed '~' sign because it is not present on keyboard layouts for some <br>
+                        european languages. And also it does not give any error on previous <br>
+                        versions of PHP with short tags enabled, because this is recognized as <br>
+                        bitwise operation.</p>
+                    <p>Operator is compiled into the following AST:</p>
+                    <p>echo PHPEscaper::escape(first_argument, second_argument);</p>
+                    <p>Don't you forget that we already have special operator for one function? <br>
+                        Backticks and <code>shell_exec()</code>. New operator is compiled very similar to it.</p>
+                    <p>There is a default implementation of the class 'PHPEscaper'. It has 4 <br>
+                        static methods:</p>
+                    <p>PHPEscaper::escape($string, $context = 'html'); <br>
+                        PHPEscaper::registerHandler($context, $escaper_function); <br>
+                        PHPEscaper::unregisterHandler($context); <br>
+                        PHPEscaper::getHandlers();</p>
+                    <p>Method PHPEscaper::escape($string, $context) splits $context by '|' <br>
+                        delimiter, all parts are trimmed, and then calls registered handler for <br>
+                        every context in a chain. <br>
+                        'html' is default value for context, and it has special handling. <br>
+                        If there is no handler for 'html' context, it calls <br>
+                        htmlspecialchars($string, <code>ENT_QUOTES</code> | ENT_SUBSTITUTE);</p>
+                    <p>We can use it like this:</p>
+                    &lt;?php
+                    // anywhere in application
+                    PHPEscaper::registerHandler('html', [MyEscaper, 'escapeHtml']);
+                    PHPEscaper::registerHandler('js', function($str) { return
+                    json_encode($str); });
+                    ?&gt;
+                    &lt;?* $str, 'js | html' ?&gt;
+                    <p>And even more. <br>
+                        In the AST, 'PHPEscaper' is registered as not fully qualified name <br>
+                        (ZEND_NAME_NOT_FQ). <br>
+                        This allows us to use namespaces and autoloading:</p>
+                    &lt;?php use MyEscaper as PHPEscaper; ?&gt;
+                    &lt;?* $str, 'js | html' ?&gt;
+                    <p>MyEscaper::escape($str, 'js | html') will be called.</p>
+                    <p>In this way we can have autoloading, multiple contexts, HTML escaping by <br>
+                        default, and full control and customization. <br>
+                        This is not an operator for one function, just there is one default <br>
+                        implementation.</p>
+                    <p>My first goal is to draw the attention on the problem with a security and <br>
+                        HTML escaping. Exact implementation is secondary thing.</p>
+                    <p>This small change can really improve a security and make development easier <br>
+                        in many applications.</p>
+                    <p>How do you think, maybe also it would be good to create some official poll <br>
+                        about this feature and to know community opinion about it?</p>
+
+                </div>
+
+                <article id="email-10622" class="clearfix unread">
+
+                    <header>
+                        <a href="#email-10622-body" role="button" data-toggle="collapse"><span class="fa fa-compress"></span></a>
+                        <img class="avatar" src="https://secure.gravatar.com/avatar/d40a3ab6309af90f94ec361befd4ac42?d=retro&amp;s=50" alt="Thomas Bley" title="Thomas Bley">
+                        <span class="hidden-xs">Posted</span>
+                        <a class="email-date" href="#email-10622" title="July 16, 2016 12:35">22 hours ago</a>
+                        by <strong>Thomas Bley</strong>
+                        <div class="label label-primary">unread</div>
+                    </header>
+
+                    <div id="email-10622-body" class="collapse in">
+                        <div class="email-content">
+                            <p>if I see it correctly, this is just a framework for defining callbacks to a escaping operator, without a implementation of "html" and "js"? <br>
+                                Not sure if this helps.</p>
+                            <p>Regards <br>
+                                Thomas</p>
+                            <p>Michael Vostrikov wrote on 16.07.2016 17:33:</p>
+                            <blockquote>
+                                <p>Hello. <br>
+                                    I have created RFC about context-dependent escaping operator. <br>
+                                    <a href="https://wiki.php.net/rfc/escaping_operator" rel="nofollow" target="_blank">https://wiki.php.net/rfc/escaping_operator</a></p>
+                                <p>Initial discussion was here: <a href="http://marc.info/?t=146619199100001" rel="nofollow" target="_blank">http://marc.info/?t=146619199100001</a></p>
+                                <p>At first, I wanted to add a call of special function like <br>
+                                    escaper_call($str, $context), which performs html-escaping by default and <br>
+                                    can be replaced with a separate extension for extended work with contexts. <br>
+                                    But then I figured out better variant.</p>
+                                <p>Main idea.</p>
+                                <p>Operator has the following form:</p>
+                                &lt;?* $str ?&gt;
+                                &lt;?* $str, 'html' ?&gt;
+                                &lt;?* $str, 'js | html' ?&gt;
+                                <p>Both expressions can be any type which can be converted to string. Second <br>
+                                    expression is optional.</p>
+                                <p>I changed '~' sign because it is not present on keyboard layouts for some <br>
+                                    european languages. And also it does not give any error on previous <br>
+                                    versions of PHP with short tags enabled, because this is recognized as <br>
+                                    bitwise operation.</p>
+                                <p>Operator is compiled into the following AST:</p>
+                                <p>echo PHPEscaper::escape(first_argument, second_argument);</p>
+                                <p>Don't you forget that we already have special operator for one function? <br>
+                                    Backticks and <code>shell_exec()</code>. New operator is compiled very similar to it.</p>
+                                <p>There is a default implementation of the class 'PHPEscaper'. It has 4 <br>
+                                    static methods:</p>
+                                <p>PHPEscaper::escape($string, $context = 'html'); <br>
+                                    PHPEscaper::registerHandler($context, $escaper_function); <br>
+                                    PHPEscaper::unregisterHandler($context); <br>
+                                    PHPEscaper::getHandlers();</p>
+                                <p>Method PHPEscaper::escape($string, $context) splits $context by '|' <br>
+                                    delimiter, all parts are trimmed, and then calls registered handler for <br>
+                                    every context in a chain. <br>
+                                    'html' is default value for context, and it has special handling. <br>
+                                    If there is no handler for 'html' context, it calls <br>
+                                    htmlspecialchars($string, <code>ENT_QUOTES</code> | ENT_SUBSTITUTE);</p>
+                                <p>We can use it like this:</p>
+                                &lt;?php
+                                // anywhere in application
+                                PHPEscaper::registerHandler('html', [MyEscaper, 'escapeHtml']);
+                                PHPEscaper::registerHandler('js', function($str) { return
+                                json_encode($str); });
+                                ?&gt;
+                                &lt;?* $str, 'js | html' ?&gt;
+                                <p>And even more. <br>
+                                    In the AST, 'PHPEscaper' is registered as not fully qualified name <br>
+                                    (ZEND_NAME_NOT_FQ). <br>
+                                    This allows us to use namespaces and autoloading:</p>
+                                &lt;?php use MyEscaper as PHPEscaper; ?&gt;
+                                &lt;?* $str, 'js | html' ?&gt;
+                                <p>MyEscaper::escape($str, 'js | html') will be called.</p>
+                                <p>In this way we can have autoloading, multiple contexts, HTML escaping by <br>
+                                    default, and full control and customization. <br>
+                                    This is not an operator for one function, just there is one default <br>
+                                    implementation.</p>
+                                <p>My first goal is to draw the attention on the problem with a security and <br>
+                                    HTML escaping. Exact implementation is secondary thing.</p>
+                                <p>This small change can really improve a security and make development easier <br>
+                                    in many applications.</p>
+                                <p>How do you think, maybe also it would be good to create some official poll <br>
+                                    about this feature and to know community opinion about it?</p>
+                            </blockquote>
+
+                        </div>
+
+                        <article id="email-10623" class="clearfix unread">
+
+                            <header>
+                                <a href="#email-10623-body" role="button" data-toggle="collapse"><span class="fa fa-compress"></span></a>
+                                <img class="avatar" src="https://secure.gravatar.com/avatar/d4d57572d4914514d4666d1f0f1c6b96?d=retro&amp;s=50" alt="Michael Vostrikov" title="Michael Vostrikov">
+                                <span class="hidden-xs">Posted</span>
+                                <a class="email-date" href="#email-10623" title="July 16, 2016 12:51">22 hours ago</a>
+                                by <strong>Michael Vostrikov</strong>
+                                <div class="label label-primary">unread</div>
+                            </header>
+
+                            <div id="email-10623-body" class="collapse in">
+                                <div class="email-content">
+                                    <p>if I see it correctly, this is just a framework for defining callbacks to <br>
+                                        a escaping operator, without a implementation of "html" and "js"?</p>
+                                    <blockquote>
+                                        <p>Not sure if this helps. <br>
+                                            There is a default escaping for HTML. If there is no registered handler for <br>
+                                            'html' context, it calls htmlspecialchars($str, <code>ENT_QUOTES</code> | <br>
+                                            ENT_SUBSTITUTE).</p>
+                                    </blockquote>
+
+                                </div>
+                            </div>
+
+                        </article>
+
+
+                    </div>
+
+                </article>
+
+
+
+                <article id="email-10624" class="clearfix unread">
+
+                    <header>
+                        <a href="#email-10624-body" role="button" data-toggle="collapse"><span class="fa fa-compress"></span></a>
+                        <img class="avatar" src="https://secure.gravatar.com/avatar/8d38b3d36076f79e754177d4d98063f8?d=retro&amp;s=50" alt="Dan Ackroyd" title="Dan Ackroyd">
+                        <span class="hidden-xs">Posted</span>
+                        <a class="email-date" href="#email-10624" title="July 16, 2016 16:24">18 hours ago</a>
+                        by <strong>Dan Ackroyd</strong>
+                        <div class="label label-primary">unread</div>
+                    </header>
+
+                    <div id="email-10624-body" class="collapse in">
+                        <div class="email-content">
+                            <p>Hi Michael,</p>
+                            <p>On 16 July 2016 at 16:33, Michael Vostrikov <a href="mailto:michael.vostrikov@gmail.com">michael.vostrikov@gmail.com</a> wrote:</p>
+                            <blockquote>
+                                <p>Hello. <br>
+                                    I have created RFC about context-dependent escaping operator. <br>
+                                    <a href="https://wiki.php.net/rfc/escaping_operator" rel="nofollow" target="_blank">https://wiki.php.net/rfc/escaping_operator</a></p>
+                                <p>Initial discussion was here: <a href="http://marc.info/?t=146619199100001" rel="nofollow" target="_blank">http://marc.info/?t=146619199100001</a></p>
+                            </blockquote>
+                            <p>I'm more than slightly sceptical about this RFC's chances, but to give <br>
+                                you some feedback, this bit is a bad pattern:</p>
+                            <blockquote>
+                                <p>bool PHPEscaper::registerHandler(string $context, callable $escaper_function)</p>
+                                <p>Registers new handler for a given context. If handler for this context is already <br>
+                                    registered, it returns false, on success registration returns true.</p>
+                            </blockquote>
+                            <p>It would be better to return the previous handler, or <code>NULL</code> if one <br>
+                                wasn't set, in the same way as <code>set_error_handler()</code> does, and for the <br>
+                                same reasons.</p>
+                            <p>Also, shouldn't these just be functions? Why is there a class involved <br>
+                                when it only has static functions/state?</p>
+                            <p>cheers <br>
+                                Dan</p>
+
+                        </div>
+
+                        <article id="email-10626" class="clearfix unread">
+
+                            <header>
+                                <a href="#email-10626-body" role="button" data-toggle="collapse"><span class="fa fa-compress"></span></a>
+                                <img class="avatar" src="https://secure.gravatar.com/avatar/d4d57572d4914514d4666d1f0f1c6b96?d=retro&amp;s=50" alt="Michael Vostrikov" title="Michael Vostrikov">
+                                <span class="hidden-xs">Posted</span>
+                                <a class="email-date" href="#email-10626" title="July 16, 2016 23:49">11 hours ago</a>
+                                by <strong>Michael Vostrikov</strong>
+                                <div class="label label-primary">unread</div>
+                            </header>
+
+                            <div id="email-10626-body" class="collapse in">
+                                <div class="email-content">
+                                    <p>It would be better to return the previous handler, or <code>NULL</code> if one</p>
+                                    <blockquote>
+                                        <p>wasn't set, in the same way as <code>set_error_handler()</code> does, and for the same <br>
+                                            reasons.</p>
+                                    </blockquote>
+                                    <p>Well, maybe you are right. <br>
+                                        But I thought, this is not a use case, usually we don't need multiple <br>
+                                        handlers for certain context. I.e. we don't need to encode single quotes in <br>
+                                        HTML as ''' in one template and as ''' in another. <br>
+                                        Use case would be the following: if there is no handler for 'my_context', <br>
+                                        register this handler. If some library really need to replace existing <br>
+                                        handler of application, it can call unregisterHandler() directly. <br>
+                                        Also in Twig there is no such behavior, and applications with it work good. <br>
+                                        I tried not to invent new mechanisms of usage.</p>
+                                    <blockquote>
+                                        <p>Also, shouldn't these just be functions? Why is there a class involved <br>
+                                            when it only has static functions/state?</p>
+                                    </blockquote>
+                                    <p>I didn't want to add many related items to a global namespace. And with <br>
+                                        class we can use autoloading and fully replace an implementation, unlike <br>
+                                        functions. It is possible to disable extension and use own class.</p>
+
+                                </div>
+
+                                <article id="email-10627" class="clearfix unread">
+
+                                    <header>
+                                        <a href="#email-10627-body" role="button" data-toggle="collapse"><span class="fa fa-compress"></span></a>
+                                        <img class="avatar" src="https://secure.gravatar.com/avatar/d4d57572d4914514d4666d1f0f1c6b96?d=retro&amp;s=50" alt="Michael Vostrikov" title="Michael Vostrikov">
+                                        <span class="hidden-xs">Posted</span>
+                                        <a class="email-date" href="#email-10627" title="July 17, 2016 00:12">10 hours ago</a>
+                                        by <strong>Michael Vostrikov</strong>
+                                        <div class="label label-primary">unread</div>
+                                    </header>
+
+                                    <div id="email-10627-body" class="collapse in">
+                                        <div class="email-content">
+                                            <ol>
+                                                <li>Is there any specific reason why we're using a class instead of</li>
+                                            </ol>
+                                            <blockquote>
+                                                <p>functions to register a callable the same way it's done for exception <br>
+                                                    handling or error handling? Hacking non FQN resolutions to inject another <br>
+                                                    escaper ...</p>
+                                            </blockquote>
+                                            <p>I would not call it 'hacking') This is exaclty the same as if we write <br>
+                                                'PHPEscaper::escape()' manually in PHP context. <br>
+                                                I didn't want to add many related items to a global namespace, and with <br>
+                                                class it is possible to use autoloading.</p>
+                                            <ol start="2">
+                                                <li>Is there any rationale why we're using strings separated by '|' to pass</li>
+                                            </ol>
+                                            <blockquote>
+                                                <p>context instead of an array? Ex.:</p>
+                                                &lt;?* $str, ['js', 'html'] ?&gt;
+                                            </blockquote>
+                                            <p>Yes, I thought about array. It can be added on a par with string. Strings <br>
+                                                just looks more similar to escaping in template engines.</p>
+                                            <ol start="3">
+                                                <li>I think the default implementation should throw a more specific</li>
+                                            </ol>
+                                            <blockquote>
+                                                <p>exception in case of unknown context (\PHP\EscapeException?)</p>
+                                                <ol start="4">
+                                                    <li>This line on your patch is unnecessary</li>
+                                                </ol>
+                                            </blockquote>
+                                            <p>You are right, thanks. This commit is a concept, if RFC will be accepted, I <br>
+                                                will prepare a patch with more correct code. <br>
+                                                â</p>
+
+                                        </div>
+                                    </div>
+
+                                </article>
+
+
+                            </div>
+
+                        </article>
+
+
+                    </div>
+
+                </article>
+
+
+
+                <article id="email-10625" class="clearfix unread">
+
+                    <header>
+                        <a href="#email-10625-body" role="button" data-toggle="collapse"><span class="fa fa-compress"></span></a>
+                        <img class="avatar" src="https://secure.gravatar.com/avatar/bd76cfad8c8212f15a833647d3aa61d7?d=retro&amp;s=50" alt="Marcio Almada" title="Marcio Almada">
+                        <span class="hidden-xs">Posted</span>
+                        <a class="email-date" href="#email-10625" title="July 16, 2016 23:49">11 hours ago</a>
+                        by <strong>Marcio Almada</strong>
+                        <div class="label label-primary">unread</div>
+                    </header>
+
+                    <div id="email-10625-body" class="collapse in">
+                        <div class="email-content">
+                            <p>2016-07-16 11:33 GMT-04:00 Michael Vostrikov <a href="mailto:michael.vostrikov@gmail.com">michael.vostrikov@gmail.com</a>:</p>
+                            <blockquote>
+                                <p>Hello. <br>
+                                    I have created RFC about context-dependent escaping operator. <br>
+                                    <a href="https://wiki.php.net/rfc/escaping_operator" rel="nofollow" target="_blank">https://wiki.php.net/rfc/escaping_operator</a></p>
+                                <p>Initial discussion was here: <a href="http://marc.info/?t=146619199100001" rel="nofollow" target="_blank">http://marc.info/?t=146619199100001</a></p>
+                            </blockquote>
+                            <p>Hi,</p>
+                            <p>A few possible RFC improvements:</p>
+                            <ol>
+                                <li>Is there any specific reason why we're using a class instead of <br>
+                                    functions to register a callable the same way it's done for exception <br>
+                                    handling or error handling? Hacking non FQN resolutions to inject another <br>
+                                    escaper implementation as in "&lt;?php use MyEscaper as PHPEscaper; ?&gt;" was a <br>
+                                    creative idea but it seems inconsistent with the preferable "PHP way" to <br>
+                                    handle these edge cases.</li>
+                            </ol>
+                            <p>2 . Is there any rationale why we're using strings separated by '|' to pass <br>
+                                context instead of an array? Ex.:</p>
+                            &lt;?* $str, ['js', 'html'] ?&gt;
+                            <ol start="3">
+                                <li>
+                                    <p>I think the default implementation should throw a more specific <br>
+                                        exception in case of unknown context (\PHP\EscapeException?) - <br>
+                                        currently it's throwing \Exception. The reason for that is because log <br>
+                                        level and handling may be more severe in case of failing escaping. <br>
+                                        Userland implementations should be encouraged to throw the same specific <br>
+                                        exception too (documentation could enforce that).</p>
+                                </li>
+                                <li>
+                                    <p>This line on your patch is unnecessary: <br>
+                                        <a href="https://github.com/michael-vostrikov/php-src/commit/571cd7c88488a08c82b10f0c3af559881f1a2951#diff-7eff82c2c5b45db512a9dc49fb990bb8R274" rel="nofollow" target="_blank">https://github.com/michael-vostrikov/php-src/commit/571cd7c88488a08c82b10f0c3af559881f1a2951#diff-7eff82c2c5b45db512a9dc49fb990bb8R274</a></p>
+                                </li>
+                            </ol>
+                            <p>In general this RFC looks better than the expected considering the previous <br>
+                                discussions. Please, keep improving :)</p>
+                            <p>Best, <br>
+                                MÃ¡rcio.</p>
+
+                        </div>
+
+                        <article id="email-10628" class="clearfix unread">
+
+                            <header>
+                                <a href="#email-10628-body" role="button" data-toggle="collapse"><span class="fa fa-compress"></span></a>
+                                <img class="avatar" src="https://secure.gravatar.com/avatar/a69b8f6b1e6314ce918f5e01ee7bfda4?d=retro&amp;s=50" alt="Lauri Kenttä" title="Lauri Kenttä">
+                                <span class="hidden-xs">Posted</span>
+                                <a class="email-date" href="#email-10628" title="July 17, 2016 05:54">5 hours ago</a>
+                                by <strong>Lauri Kenttä</strong>
+                                <div class="label label-primary">unread</div>
+                            </header>
+
+                            <div id="email-10628-body" class="collapse in">
+                                <div class="email-content">
+                                    <p>On 2016-07-17 06:49, Marcio Almada wrote:</p>
+                                    <blockquote>
+                                        <p>2 . Is there any rationale why we're using strings separated by '|' to <br>
+                                            pass <br>
+                                            context instead of an array? Ex.:</p>
+                                        &lt;?* $str, ['js', 'html'] ?&gt;
+                                    </blockquote>
+                                    <p>Multiple arguments would make the syntax even cleaner:</p>
+                                    &lt;?* $str, 'js', 'html' ?&gt;
+                                    <p>-- <br>
+                                        Lauri KenttÃ¤</p>
+
+                                </div>
+
+                                <article id="email-10629" class="clearfix unread">
+
+                                    <header>
+                                        <a href="#email-10629-body" role="button" data-toggle="collapse"><span class="fa fa-compress"></span></a>
+                                        <img class="avatar" src="https://secure.gravatar.com/avatar/d4d57572d4914514d4666d1f0f1c6b96?d=retro&amp;s=50" alt="Michael Vostrikov" title="Michael Vostrikov">
+                                        <span class="hidden-xs">Posted</span>
+                                        <a class="email-date" href="#email-10629" title="July 17, 2016 06:35">4 hours ago</a>
+                                        by <strong>Michael Vostrikov</strong>
+                                        <div class="label label-primary">unread</div>
+                                    </header>
+
+                                    <div id="email-10629-body" class="collapse in">
+                                        <div class="email-content">
+                                            <p>Multiple arguments would make the syntax even cleaner:</p>
+                                            <blockquote>
+                                                &lt;?* $str, 'js', 'html' ?&gt;
+                                            </blockquote>
+                                            <p>I thought about it. Multiple arguments do not allow runtime modification <br>
+                                                (and make the parser more complex). <br>
+                                                Something like this:</p>
+                                            &lt;?php
+                                            $context = [];
+                                            if ($field-&gt;name == 'url') $context[] = 'url';
+                                            $context[] = 'html';
+                                            ?&gt;
+                                            &lt;div data-my-attr="&lt;?* $field-&gt;value, implode('|', $context) ?&gt;"&gt;&lt;/div&gt;
+                                            â
+
+                                        </div>
+
+                                        <article id="email-10630" class="clearfix unread">
+
+                                            <header>
+                                                <a href="#email-10630-body" role="button" data-toggle="collapse"><span class="fa fa-compress"></span></a>
+                                                <img class="avatar" src="https://secure.gravatar.com/avatar/4e6b4a3f09d0d8c0fb07cbe755f8a230?d=retro&amp;s=50" alt="Niklas Keller" title="Niklas Keller">
+                                                <span class="hidden-xs">Posted</span>
+                                                <a class="email-date" href="#email-10630" title="July 17, 2016 06:43">4 hours ago</a>
+                                                by <strong>Niklas Keller</strong>
+                                                <div class="label label-primary">unread</div>
+                                            </header>
+
+                                            <div id="email-10630-body" class="collapse in">
+                                                <div class="email-content">
+                                                    <p>2016-07-17 12:35 GMT+02:00 Michael Vostrikov <a href="mailto:michael.vostrikov@gmail.com">michael.vostrikov@gmail.com</a>:</p>
+                                                    <blockquote>
+                                                        <blockquote>
+                                                            <p>Multiple arguments would make the syntax even cleaner:</p>
+                                                            &lt;?* $str, 'js', 'html' ?&gt;
+                                                        </blockquote>
+                                                        <p>I thought about it. Multiple arguments do not allow runtime modification <br>
+                                                            (and make the parser more complex). <br>
+                                                            Something like this:</p>
+                                                        &lt;?php
+                                                        $context = [];
+                                                        if ($field-&gt;name == 'url') $context[] = 'url';
+                                                        $context[] = 'html';
+                                                        ?&gt;
+                                                        &lt;div data-my-attr="&lt;?* $field-&gt;value, implode('|', $context) ?&gt;"&gt;&lt;/div&gt;
+                                                    </blockquote>
+                                                    <p>Context should be defined where the variable is printed. Otherwise you move <br>
+                                                        the variable from HTML text to an attribute or add it somewhere else and <br>
+                                                        the context doesn't match anymore.</p>
+                                                    <p>Regards, Niklas</p>
+
+                                                </div>
+
+                                                <article id="email-10631" class="clearfix unread">
+
+                                                    <header>
+                                                        <a href="#email-10631-body" role="button" data-toggle="collapse"><span class="fa fa-compress"></span></a>
+                                                        <img class="avatar" src="https://secure.gravatar.com/avatar/d4d57572d4914514d4666d1f0f1c6b96?d=retro&amp;s=50" alt="Michael Vostrikov" title="Michael Vostrikov">
+                                                        <span class="hidden-xs">Posted</span>
+                                                        <a class="email-date" href="#email-10631" title="July 17, 2016 07:08">3 hours ago</a>
+                                                        by <strong>Michael Vostrikov</strong>
+                                                        <div class="label label-primary">unread</div>
+                                                    </header>
+
+                                                    <div id="email-10631-body" class="collapse in">
+                                                        <div class="email-content">
+                                                            <p>Context should be defined where the variable is printed. Otherwise you</p>
+                                                            <blockquote>
+                                                                <p>move the variable from HTML text to an attribute or add it somewhere else <br>
+                                                                    and the context doesn't match anymore.</p>
+                                                            </blockquote>
+                                                            <p>Well, maybe, but HTML is external context and it can be combined with other <br>
+                                                                contexts depending on task. We can not know all possible tasks. Single <br>
+                                                                variable is just more flexible.</p>
+
+                                                        </div>
+                                                    </div>
+
+                                                </article>
+
+
+                                            </div>
+
+                                        </article>
+
+
+                                    </div>
+
+                                </article>
+
+
+                            </div>
+
+                        </article>
+
+
+
+                        <article id="email-10633" class="clearfix unread">
+
+                            <header>
+                                <a href="#email-10633-body" role="button" data-toggle="collapse"><span class="fa fa-compress"></span></a>
+                                <img class="avatar" src="https://secure.gravatar.com/avatar/d40a3ab6309af90f94ec361befd4ac42?d=retro&amp;s=50" alt="Thomas Bley" title="Thomas Bley">
+                                <span class="hidden-xs">Posted</span>
+                                <a class="email-date" href="#email-10633" title="July 17, 2016 10:16">46 minutes ago</a>
+                                by <strong>Thomas Bley</strong>
+                                <div class="label label-primary">unread</div>
+                            </header>
+
+                            <div id="email-10633-body" class="collapse in">
+                                <div class="email-content">
+                                    <p>Hacking non FQN resolutions to inject another</p>
+                                    <blockquote>
+                                        <p>escaper implementation as in "&lt;?php use MyEscaper as PHPEscaper; ?&gt;" was a <br>
+                                            creative idea but it seems inconsistent with the preferable "PHP way" to <br>
+                                            handle these edge cases.</p>
+                                    </blockquote>
+                                    <p>Just imagine use cases like:</p>
+                                    &lt;?php use MyTextPlainEscaper as PHPEscaper; ?&gt;
+                                    &lt;?php use MyCsvEscaper as PHPEscaper; ?&gt;
+                                    &lt;?php use MyXmlEscaperIso as PHPEscaper; ?&gt;
+                                    &lt;?php use MyXmlEscaperUtf as PHPEscaper; ?&gt;
+                                    &lt;?php use MyVCardEscaper as PHPEscaper; ?&gt;
+                                    <p>That way people can use the escaping operator in all kinds of templates with their own implementations.</p>
+                                    <p>Regards <br>
+                                        Thomas</p>
+                                    <p>Marcio Almada wrote on 17.07.2016 05:49:</p>
+                                    <blockquote>
+                                        <p>2016-07-16 11:33 GMT-04:00 Michael Vostrikov <a href="mailto:michael.vostrikov@gmail.com">michael.vostrikov@gmail.com</a>:</p>
+                                        <blockquote>
+                                            <p>Hello. <br>
+                                                I have created RFC about context-dependent escaping operator. <br>
+                                                <a href="https://wiki.php.net/rfc/escaping_operator" rel="nofollow" target="_blank">https://wiki.php.net/rfc/escaping_operator</a></p>
+                                            <p>Initial discussion was here: <a href="http://marc.info/?t=146619199100001" rel="nofollow" target="_blank">http://marc.info/?t=146619199100001</a></p>
+                                        </blockquote>
+                                        <p>Hi,</p>
+                                        <p>A few possible RFC improvements:</p>
+                                        <ol>
+                                            <li>Is there any specific reason why we're using a class instead of <br>
+                                                functions to register a callable the same way it's done for exception <br>
+                                                handling or error handling? Hacking non FQN resolutions to inject another <br>
+                                                escaper implementation as in "&lt;?php use MyEscaper as PHPEscaper; ?&gt;" was a <br>
+                                                creative idea but it seems inconsistent with the preferable "PHP way" to <br>
+                                                handle these edge cases.</li>
+                                        </ol>
+                                        <p>2 . Is there any rationale why we're using strings separated by '|' to pass <br>
+                                            context instead of an array? Ex.:</p>
+                                        &lt;?* $str, ['js', 'html'] ?&gt;
+                                        <ol start="3">
+                                            <li>
+                                                <p>I think the default implementation should throw a more specific <br>
+                                                    exception in case of unknown context (\PHP\EscapeException?) - <br>
+                                                    currently it's throwing \Exception. The reason for that is because log <br>
+                                                    level and handling may be more severe in case of failing escaping. <br>
+                                                    Userland implementations should be encouraged to throw the same specific <br>
+                                                    exception too (documentation could enforce that).</p>
+                                            </li>
+                                            <li>
+                                                <p>This line on your patch is unnecessary: <br>
+                                                    <a href="https://github.com/michael-vostrikov/php-src/commit/571cd7c88488a08c82b10f0c3af559881f1a2951#diff-7eff82c2c5b45db512a9dc49fb990bb8R274" rel="nofollow" target="_blank">https://github.com/michael-vostrikov/php-src/commit/571cd7c88488a08c82b10f0c3af559881f1a2951#diff-7eff82c2c5b45db512a9dc49fb990bb8R274</a></p>
+                                            </li>
+                                        </ol>
+                                        <p>In general this RFC looks better than the expected considering the previous <br>
+                                            discussions. Please, keep improving :)</p>
+                                        <p>Best, <br>
+                                            MÃ¡rcio.</p>
+                                    </blockquote>
+
+                                </div>
+                            </div>
+
+                        </article>
+
+
+                    </div>
+
+                </article>
+
+
+
+                <article id="email-10632" class="clearfix unread">
+
+                    <header>
+                        <a href="#email-10632-body" role="button" data-toggle="collapse"><span class="fa fa-compress"></span></a>
+                        <img class="avatar" src="https://secure.gravatar.com/avatar/8ae7bce2d58740d9e5173e9cbdea0c4f?d=retro&amp;s=50" alt="Rasmus Schultz" title="Rasmus Schultz">
+                        <span class="hidden-xs">Posted</span>
+                        <a class="email-date" href="#email-10632" title="July 17, 2016 07:33">3 hours ago</a>
+                        by <strong>Rasmus Schultz</strong>
+                        <div class="label label-primary">unread</div>
+                    </header>
+
+                    <div id="email-10632-body" class="collapse in">
+                        <div class="email-content">
+                            <p>I've read your RFC, and I think this a strange feature.</p>
+                            <p>All it is, really, is a registry for functions, and syntactic sugar for <br>
+                                calling those functions - it's unnecessary, it's more global state you have <br>
+                                to manage, and it's the kind of superficial convenience that will end up <br>
+                                breeding more complexity.</p>
+                            <p>What's also strange, is the ability to call functions in this registry <br>
+                                hinges on syntax. What if I want to call the registered functions from <br>
+                                within code?</p>
+                            <pre><code>`ob_start()`;
+?&gt;&lt;* $text *&gt;&lt;?
+$html = `ob_get_clean()`;
+</code></pre>
+                            <p>Yikes.</p>
+                            <p>To quote a few phrases from the RFC:</p>
+                            <blockquote>
+                                <p>Both variants &lt;?= h($something) ?&gt; and &lt;?= $something ?&gt; work good.</p>
+                            </blockquote>
+                            <p>This is so true - and the whole syntactic convenience line of thinking <br>
+                                really should end with that.</p>
+                            <blockquote>
+                                <p>Also there is a problem with function autoloading.</p>
+                            </blockquote>
+                            <p>I maintain that this is the real problem, and perhaps the only problem - <br>
+                                all this RFC does, is provide a stop-gap solution. What we should really be <br>
+                                talking about, is implementing the RFC that addresses the existing gap in <br>
+                                the the existing feature of the language.</p>
+                            <p>Your arguments don't make sense to me. It's somehow easier to choose <br>
+                                between two different characters * and ? versus electing to call a function <br>
+                                or not? I don't see how - it still requires an active choice, and I don't <br>
+                                believe there's any (sound) way around that.</p>
+                            <p>All this RFC changes is the syntax - not the problem.</p>
+                            <p>Addition of a feature like this will affect even those who don't use it - <br>
+                                we all collaborate in teams, and most of us  contribute to open source <br>
+                                projects... a feature like this will bring global state, side-effects and <br>
+                                many other interesting problems even to those who don't elect to use it, <br>
+                                when they inherit or consume code that does.</p>
+                            <p>The poll doesn't make a whole lot of sense either, because you're asking <br>
+                                specifically about the proposed feature, rather than asking in general <br>
+                                about the problem. This doesn't prompt people to think about the problem - <br>
+                                it prompts them to consider the proposed solution. It's easy enough to look <br>
+                                at this on the surface and think "sure, that solves it" - reasoning about <br>
+                                the impact on the language, or deeper problems not directly relating to <br>
+                                this on the surface, requires more of an involvement than just a quick <br>
+                                click on a radio button.</p>
+                            <blockquote>
+                                <p>More than 90% of output data - is data from DB and must be HTML-encoded</p>
+                            </blockquote>
+                            <p>Yet, you argue we need a function registry for all kinds of other escape <br>
+                                operations to address the other 10%. I can't follow this line of thinking. <br>
+                                If the 90% use case is HTML escaping (with UTF-8 encoding, as is likely <br>
+                                true) then maybe I could accept the addition of syntax just for that. <br>
+                                <em>Maybe</em>.</p>
+                            <p>I would still be <em>much</em> more concerned about the limited usefulness of <br>
+                                functions in general, which could be more generally addressed by solving <br>
+                                autoloading.</p>
+                            <p>I view this RFC as a huge distraction and, if implemented, addressing that <br>
+                                one use-case for functions (templates) we're more likely to put off the <br>
+                                deeper issues for even longer.</p>
+                            <p>Please, let's focus on improving the language in general - rather than <br>
+                                improving one isolated use-case.</p>
+                            <p>On Sat, Jul 16, 2016 at 5:33 PM, Michael Vostrikov &lt; <br>
+                                <a href="mailto:michael.vostrikov@gmail.com" rel="nofollow" target="_blank">michael.vostrikov@gmail.com</a>&gt; wrote:</p>
+                            <blockquote>
+                                <p>Hello. <br>
+                                    I have created RFC about context-dependent escaping operator. <br>
+                                    <a href="https://wiki.php.net/rfc/escaping_operator" rel="nofollow" target="_blank">https://wiki.php.net/rfc/escaping_operator</a></p>
+                                <p>Initial discussion was here: <a href="http://marc.info/?t=146619199100001" rel="nofollow" target="_blank">http://marc.info/?t=146619199100001</a></p>
+                                <p>At first, I wanted to add a call of special function like <br>
+                                    escaper_call($str, $context), which performs html-escaping by default and <br>
+                                    can be replaced with a separate extension for extended work with contexts. <br>
+                                    But then I figured out better variant.</p>
+                                <p>Main idea.</p>
+                                <p>Operator has the following form:</p>
+                                &lt;?* $str ?&gt;
+                                &lt;?* $str, 'html' ?&gt;
+                                &lt;?* $str, 'js | html' ?&gt;
+                                <p>Both expressions can be any type which can be converted to string. Second <br>
+                                    expression is optional.</p>
+                                <p>I changed '~' sign because it is not present on keyboard layouts for some <br>
+                                    european languages. And also it does not give any error on previous <br>
+                                    versions of PHP with short tags enabled, because this is recognized as <br>
+                                    bitwise operation.</p>
+                                <p>Operator is compiled into the following AST:</p>
+                                <p>echo PHPEscaper::escape(first_argument, second_argument);</p>
+                                <p>Don't you forget that we already have special operator for one function? <br>
+                                    Backticks and <code>shell_exec()</code>. New operator is compiled very similar to it.</p>
+                                <p>There is a default implementation of the class 'PHPEscaper'. It has 4 <br>
+                                    static methods:</p>
+                                <p>PHPEscaper::escape($string, $context = 'html'); <br>
+                                    PHPEscaper::registerHandler($context, $escaper_function); <br>
+                                    PHPEscaper::unregisterHandler($context); <br>
+                                    PHPEscaper::getHandlers();</p>
+                                <p>Method PHPEscaper::escape($string, $context) splits $context by '|' <br>
+                                    delimiter, all parts are trimmed, and then calls registered handler for <br>
+                                    every context in a chain. <br>
+                                    'html' is default value for context, and it has special handling. <br>
+                                    If there is no handler for 'html' context, it calls <br>
+                                    htmlspecialchars($string, <code>ENT_QUOTES</code> | ENT_SUBSTITUTE);</p>
+                                <p>We can use it like this:</p>
+                                &lt;?php
+                                // anywhere in application
+                                PHPEscaper::registerHandler('html', [MyEscaper, 'escapeHtml']);
+                                PHPEscaper::registerHandler('js', function($str) { return
+                                json_encode($str); });
+                                ?&gt;
+                                &lt;?* $str, 'js | html' ?&gt;
+                                <p>And even more. <br>
+                                    In the AST, 'PHPEscaper' is registered as not fully qualified name <br>
+                                    (ZEND_NAME_NOT_FQ). <br>
+                                    This allows us to use namespaces and autoloading:</p>
+                                &lt;?php use MyEscaper as PHPEscaper; ?&gt;
+                                &lt;?* $str, 'js | html' ?&gt;
+                                <p>MyEscaper::escape($str, 'js | html') will be called.</p>
+                                <p>In this way we can have autoloading, multiple contexts, HTML escaping by <br>
+                                    default, and full control and customization. <br>
+                                    This is not an operator for one function, just there is one default <br>
+                                    implementation.</p>
+                                <p>My first goal is to draw the attention on the problem with a security and <br>
+                                    HTML escaping. Exact implementation is secondary thing.</p>
+                                <p>This small change can really improve a security and make development easier <br>
+                                    in many applications.</p>
+                                <p>How do you think, maybe also it would be good to create some official poll <br>
+                                    about this feature and to know community opinion about it?</p>
+                            </blockquote>
+
+                        </div>
+
+                        <article id="email-10634" class="clearfix unread">
+
+                            <header>
+                                <a href="#email-10634-body" role="button" data-toggle="collapse"><span class="fa fa-compress"></span></a>
+                                <img class="avatar" src="https://secure.gravatar.com/avatar/d4d57572d4914514d4666d1f0f1c6b96?d=retro&amp;s=50" alt="Michael Vostrikov" title="Michael Vostrikov">
+                                <span class="hidden-xs">Posted</span>
+                                <a class="email-date" href="#email-10634" title="July 17, 2016 10:47">15 minutes ago</a>
+                                by <strong>Michael Vostrikov</strong>
+                                <div class="label label-primary">unread</div>
+                            </header>
+
+                            <div id="email-10634-body" class="collapse in">
+                                <div class="email-content">
+                                    <p>All it is, really, is a registry for functions, and syntactic sugar for</p>
+                                    <blockquote>
+                                        <p>calling those functions - it's unnecessary, it's more global state you have <br>
+                                            to manage and it's the kind of superficial convenience that will end up <br>
+                                            breeding more complexity.</p>
+                                    </blockquote>
+                                    <p>Registry of functions - is exactly how escaping is performed in Symfony and <br>
+                                        Twig. <br>
+                                        <a href="https://github.com/symfony/symfony/blob/f29d46f29b91ea5c30699cf6bdb8e65545d1dd26/src/Symfony/Component/Templating/PhpEngine.php#L421" rel="nofollow" target="_blank">https://github.com/symfony/symfony/blob/f29d46f29b91ea5c30699cf6bdb8e65545d1dd26/src/Symfony/Component/Templating/PhpEngine.php#L421</a> <br>
+                                        <a href="https://github.com/twigphp/Twig/blob/f0a4fa678465491947554f6687c5fca5e482f8ec/lib/Twig/Extension/Core.php#L1039" rel="nofollow" target="_blank">https://github.com/twigphp/Twig/blob/f0a4fa678465491947554f6687c5fca5e482f8ec/lib/Twig/Extension/Core.php#L1039</a></p>
+                                    <p>What's also strange, is the ability to call functions in this registry</p>
+                                    <blockquote>
+                                        <p>hinges on syntax. What if I want to call the registered functions from <br>
+                                            within code? <br>
+                                            <code>ob_start()</code>; <br>
+                                            ?&gt;&lt;* $text *&gt;&lt;? <br>
+                                            $html = <code>ob_get_clean()</code>;</p>
+                                    </blockquote>
+                                    <p>Sorry, I don't understand what do you mean in this example. You can call <br>
+                                        your escapers by name or by callable value from array of handlers.</p>
+                                    &lt;?php
+
+                                    function myHtmlEscaper($str) {
+                                    return htmlspecialchars($str, `ENT_QUOTES` | ENT_HTML5 |
+                                    `ENT_DISALLOWED` | ENT_SUBSTITUTE);
+                                    }
+
+                                    PHPEscaper::registerHandler('html', myHtmlEscaper);
+                                    $text = '"Test"';
+
+                                    // --------
+
+                                    `ob_start()`;
+                                    ?&gt;&lt;* $text *&gt;&lt;?         // do you mean a call of escaper here?
+                                    <pre><code>$html = `ob_get_clean()`;
+var_dump($html);
+
+// string(11) "&lt;* $text *&gt;"
+
+// --------
+
+`ob_start()`;
+?&gt;&lt;?* $text ?&gt;&lt;?
+$html = `ob_get_clean()`;
+var_dump($html);
+
+// string(16) "&amp;quot;Test&amp;quot;"
+
+// --------
+
+$escapers = PHPEscaper::getHandlers();
+$htmlEscaperCallable = $escapers['html'];
+`ob_start()`;
+echo $htmlEscaperCallable($text);
+$html = `ob_get_clean()`;
+var_dump($html);
+
+// string(16) "&amp;quot;Test&amp;quot;"
+</code></pre>
+                                    <p>?&gt;</p>
+                                    <blockquote>
+                                        <p>Both variants &lt;?= h($something) ?&gt; and &lt;?= $something ?&gt; work good. <br>
+                                            This is so true - and the whole syntactic convenience line of thinking <br>
+                                            really should end with that.</p>
+                                    </blockquote>
+                                    <p>Wrong and unsafe variant should not work good.</p>
+                                    <blockquote>
+                                        <p>Also there is a problem with function autoloading. <br>
+                                            I maintain that this is the real problem, and perhaps the only problem - <br>
+                                            all this RFC does, is provide a stop-gap solution.</p>
+                                    </blockquote>
+                                    <p>This RFC is not related to function autoloading. It just does not have this <br>
+                                        problem. The code becomes the same as if we will write PHPEscaper::escape() <br>
+                                        manually. In the static calls there is no problem with autoloading.</p>
+                                    <p>It's somehow easier to choose between two different characters * and =</p>
+                                    <blockquote>
+                                        <p>versus electing to call a function or not?</p>
+                                    </blockquote>
+                                    <p>Unsafe variant 'not to call a function' is a short subset of safe variant <br>
+                                        'call a function'. Safe variant requires additional actions. With new <br>
+                                        operator safe variant is as easy as unsafe. <br>
+                                        And we must not choose, operator &lt;?* ?&gt; must be used everywhere, except <br>
+                                        1-2% of cases where we have ready HTML. <br>
+                                        And if we accidentally use it for HTML, this will not be an XSS, it just <br>
+                                        will show double-encoded content, and this will be noticeable.</p>
+                                    <p>All this RFC changes is the syntax - not the problem.</p>
+                                    <blockquote>
+                                    </blockquote>
+                                    <p>Ok, what do you think is the problem? As I think, the problem is correct <br>
+                                        HTML escaping and XSS. And it can be solved the same way as in template <br>
+                                        engines. I don't suggest to bring the whole template engine into PHP, only <br>
+                                        escaping mechanism. Function autoloading - is another problem.</p>
+                                    <p>Addition of a feature like this will affect even those who don't use it</p>
+                                    <blockquote>
+                                    </blockquote>
+                                    <p>It does not affect any existing code. It is not a replacement for &lt;?= ?&gt; <br>
+                                        operator.</p>
+                                    <p>a feature like this will bring global state, side-effects and many other</p>
+                                    <blockquote>
+                                        <p>interesting problems</p>
+                                    </blockquote>
+                                    <p>Default implementation of PHPEscaper is not required. This is possible to <br>
+                                        fully remove it and use custom PHPEscaper written on PHP. Or just don't use <br>
+                                        this operator and don't worry about escaping. <br>
+                                        Ok, could you please give an example of the problem?</p>
+                                    <p>when they inherit or consume code that does</p>
+                                    <blockquote>
+                                    </blockquote>
+                                    <p>I think this is the same as if they inherit or consume code that uses Twig <br>
+                                        or Smarty.</p>
+                                    <p>you're asking specifically about the proposed feature, rather than asking</p>
+                                    <blockquote>
+                                        <p>in general about the problem</p>
+                                    </blockquote>
+                                    <p>The proposed feature solves the problem with HTML escaping. I asked about <br>
+                                        presence of problem and about a solution. <br>
+                                        Also, in the previous discussion I got the first answer that "Main issue <br>
+                                        with this kind of proposals is that escaping is context-dependent". This <br>
+                                        issue is mentioned in many other discussions. And I suggested a solution <br>
+                                        for this problem too.</p>
+                                    <p>And that's why I asked about an official poll in the first message of this <br>
+                                        discussion. This is a serious change and we need to know community opinion <br>
+                                        about it.</p>
+                                    <p>reasoning about the impact on the language, or deeper problems requires</p>
+                                    <blockquote>
+                                        <p>more of an involvement</p>
+                                    </blockquote>
+                                    <p>And RFC is intended for this, isn't it? Could you give an example of impact <br>
+                                        which can bring the problems?</p>
+                                    <blockquote>
+                                        <p>More than 90% of output data - is data from DB and must be HTML-encoded <br>
+                                            Yet, you argue we need a function registry for all kinds of other escape <br>
+                                            operations to address the other 10%</p>
+                                    </blockquote>
+                                    <p>Hm, wait please. Initially I suggested an operator specially for HTML <br>
+                                        escaping. I tried to demonstrate that this is special context and it <br>
+                                        deserve its own operator. I got the answer that there are many other <br>
+                                        contexts and making an operator for one context is a bad idea. Ok, I <br>
+                                        suggested the solution which allows and HTML escaping, and usage of other <br>
+                                        contexts. Let's define, what is more suitable - many contexts or one <br>
+                                        context.</p>
+                                    <p>you argue we need a function registry</p>
+                                    <blockquote>
+                                    </blockquote>
+                                    <p>Function registry is just a default implementation of PHPEscaper class. It <br>
+                                        can be used 'out of the box' and provides HTML escaping by default. Default <br>
+                                        implementation can fully be removed from the project, and replaced with <br>
+                                        custom implementation - e.g. with limited set of methods. There is just one <br>
+                                        static call, which does not differ from function call, but allows <br>
+                                        autoloading.</p>
+                                    <p>which could be more generally addressed by solving autoloading</p>
+                                    <blockquote>
+                                    </blockquote>
+                                    <p>I can only repeat that the problem is not that we don't have a function. We <br>
+                                        have a function and can write own functions. Maybe there are little issues <br>
+                                        with direct usage of static class method, but it can be solved by defining <br>
+                                        a function in global namespace, which will call this method, as it is done <br>
+                                        in some frameworks.</p>
+                                    <p>Please, let's focus on improving the language in general - rather than</p>
+                                    <blockquote>
+                                        <p>improving one isolated use-case.</p>
+                                    </blockquote>
+                                    <p>Why do you call 90% of output data a 'one isolated use-case'?) I can only <br>
+                                        mention here the words which were shown to me when I created the RFC:</p>
+                                    <p>Quoting Rasmus: <br>
+                                        PHP is and should remain: <br>
+                                        1) a pragmatic web-focused language <br>
+                                        2) a loosely typed language <br>
+                                        3) a language which caters to the skill-levels and platforms of a wide <br>
+                                        range of users</p>
+                                    <p>HTML escaping is a very pragmatic task.</p>
+
+                                </div>
+                            </div>
+
+                        </article>
+
+
+                    </div>
+
+                </article>
+
+
+            </div>
+
+        </article>
+
+
+    </section>
+</div>

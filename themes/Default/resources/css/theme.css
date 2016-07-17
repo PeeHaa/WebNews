@@ -1,0 +1,196 @@
+/**
+ * Base layout
+ */
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    background-color: #fafafa;
+    font-family: 'Open Sans', sans-serif;
+    margin-bottom: 240px;
+    overflow-y: scroll;
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 140px;
+}
+
+/**
+ * Elements
+ */
+.h1, h1 {
+    font-size: 36px;
+    font-weight: 100;
+}
+
+.badge {
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    color: #ffffff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    background-color: #999999;
+    border-radius: 10px;
+}
+
+.text-muted {
+    color: #999999;
+}
+
+/**
+ * Header
+ */
+header.site-header {
+    height: 40px;
+    line-height: 40px;
+    background: #f5f5f5;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    font-size: 12px;
+    color: #999999;
+}
+
+header.site-header ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    float: left;
+}
+
+header.site-header ul li a {
+    display: inline-block;
+    height: 40px;
+    line-height: 40px;
+    padding: 0 10px;
+    text-decoration: none;
+    text-align: center;
+    color: #c5c5c5;
+    font-weight: 100;
+    font-size: 17px;
+}
+
+header.site-header .account {
+    float: right;
+    display: block;
+    padding: 0 10px;
+}
+
+header.site-header .account .fa-github {
+    font-size: 19px;
+    vertical-align: middle;
+}
+
+/**
+ * Footer
+ */
+footer {
+    padding-top: 50px;
+    padding-bottom: 50px;
+    color: #99979c;
+    text-align: center;
+    background-color: #2a2730;
+}
+
+/**
+ * Content
+ */
+.home-header {
+    position: relative;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+    padding: 40px 0 60px;
+    font-size: 24px;
+    text-align: left;
+}
+
+.home-header h1 {
+    margin-top: 0;
+    color: #696969;
+    font-weight: normal;
+    font-size: 60px;
+}
+
+.home-header p {
+    margin-bottom: 0;
+    font-weight: 300;
+    line-height: 1.4;
+}
+
+.thread-list {
+    font-size: 1.2em;
+}
+
+.thread-list .number-of-messages {
+    width: 60px;
+    text-align: right;
+}
+
+.thread {
+    margin-bottom: 50px;
+}
+
+article {
+    background-color: white;
+    border: 1px solid #e6e6e6;
+    padding: 20px 0 20px 20px;
+    margin: 20px 0 0;
+    overflow: hidden;
+}
+
+article header {
+    border-bottom: 1px solid #e6e6e6;
+    padding: 5px 16px;
+    margin: -20px 0 20px -20px;
+    background-color: #f1f1f1;
+    color: #757575;
+    font-size: 0.9em;
+}
+
+article header .avatar {
+    float: right;
+    border-radius: 50%;
+    box-shadow: 1px 2px 5px 1px #c0c0c0;
+    height: 50px;
+    width: 50px;
+}
+
+article header .email-date {
+    color: inherit;
+    text-decoration: underline;
+}
+
+article header .label {
+    margin-left: 10px;
+    font-weight: normal;
+}
+
+article .email-content {
+    overflow: hidden;
+}
+
+article article, article article article article, article article article article article article {
+    background-color: #f9fafb;
+}
+
+article article article, article article article article article, article article article article article article article {
+    background-color: #ffffff;
+}
+
+article article {
+    border-right: none;
+}
+
+article blockquote {
+    color: #999;
+    padding: 0 20px;
+    font-size: 0.98em;
+}
