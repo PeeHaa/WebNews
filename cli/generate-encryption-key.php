@@ -6,9 +6,9 @@ use CodeCollab\Encryption\Defusev2\Key;
 
 require_once __DIR__ . '/../bootstrap.php';
 
-$keyPath = realpath(__DIR__ . '/../data/encryption.key');
+$keyPath = realpath(__DIR__ . '/../data') . '/encryption.key';
 
-if (file_exists(__DIR__ . '/../data/encryption.key')) {
+if (file_exists($keyPath)) {
     echo 'Encryption key already exists in `' . $keyPath . '`.' . PHP_EOL;
     exit;
 }
