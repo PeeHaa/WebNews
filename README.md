@@ -29,6 +29,7 @@ Set your document root to the `/public` directory and route all requests through
 
 [MIT][mit]
 
+Inspiration and design is stolen from [mnapoli/externals](https://github.com/mnapoli/externals).
 
 ## Security issues
 
