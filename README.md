@@ -11,7 +11,7 @@ News server web interface
 
 ### Download the project and install dependencies
 
-composer create-project peehaa/web-news
+    composer create-project peehaa/web-news
 
 ### Set up the configuration
 
