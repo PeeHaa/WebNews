@@ -1,0 +1,32 @@
+{
+    "name": "peehaa/web-news",
+    "description": "NNTP frontend",
+    "version": "0.1.0",
+    "type": "application",
+    "keywords": ["peehaa", "nntp", "news"],
+    "homepage": "https://github.com/PeeHaa/WebNews",
+    "license": "See the LICENSE file",
+    "authors": [
+        {
+            "name": "Pieter Hordijk",
+            "role": "Lead"
+        }
+    ],
+    "autoload": {
+        "psr-4": {"WebNews\\": "src/"}
+    },
+    "prefer-stable": true,
+    "require": {
+        "php": "^7",
+        "codecollab/router": "^1",
+        "codecollab/form": "^1",
+        "codecollab/http": "^1",
+        "codecollab/theme": "^1",
+        "codecollab/template": "^1",
+        "codecollab/i18n": "^1",
+        "rdlowrey/auryn": "^1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.4"
+    }
+}
