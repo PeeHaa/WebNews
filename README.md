@@ -29,6 +29,7 @@ Set your document root to the `/public` directory and route all requests through
 
 [MIT][mit]
 
+
 ## Security issues
 
 If you found a security issue please contact directly by mail instead of using the issue tracker at codecollab-security@pieterhordijk.com
