@@ -1,0 +1,14 @@
+{
+    "name": "Default",
+    "description": "Default theme for the WebNews project",
+    "version": "1.0.0",
+    "website": "https://pieterhordijk.com",
+    "authors": [
+        {
+            "name": "Pieter Hordijk",
+            "role": "Master of bootstrap tweaking",
+            "website": "https://pieterhordijk.com",
+            "email": "info@pieterhordijk.com"
+        }
+    ]
+}
