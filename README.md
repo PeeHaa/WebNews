@@ -17,6 +17,10 @@ composer create-project peehaa/web-news
 
 Copy `/config/config.sample.php` to `/config/config.php` and make the changes to it for your environment.
 
+### Generate the encryption key
+
+    php cli/generate-encryption-key.php
+
 ### Set up the web server
 
 Set your document root to the `/public` directory and route all requests through the `/public/index.php` file.
