@@ -19,6 +19,8 @@ use FastRoute\DataGenerator\GroupCountBased as GroupCountBasedDataGenerator;
 use FastRoute\Dispatcher\GroupCountBased as RouteDispatcher;
 use WebNews\Presentation\Template\Html;
 use CodeCollab\Theme\Loader as ThemeLoader;
+use Minifine\Minifine;
+use Minifine\Factory as MinifineFactory;
 use CodeCollab\Theme\Theme;
 use CodeCollab\I18n\Translator;
 use CodeCollab\I18n\FileTranslator;
@@ -109,6 +111,17 @@ $auryn->define(Router::class, [
     ':cacheFile' => $cacheFile,
     ':forceReload' => $configuration['reloadRoutes'],
 ]);
+
+/**
+ * Setup the minifier
+ */
+$auryn->share(Minifine::class);
+$auryn->delegate(Minifine::class, function() use ($configuration) {
+    return (new MinifineFactory)->build(
+        __DIR__ . '/themes/' . $configuration['activeTheme'] . $configuration['resourcesDirectory'],
+        !$configuration['minifyResources']
+    );
+});
 
 /**
  * Setup templating

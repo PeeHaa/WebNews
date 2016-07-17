@@ -2,9 +2,13 @@
 
 $configuration = [
     // Set to false on production to use cached routes
-    'reloadRoutes'   => true,
+    'reloadRoutes'       => true,
+    // Set to false on production to use compiled resources
+    'minifyResources'    => true,
     // The active theme that is used
-    'activeTheme'    => 'Default',
+    'activeTheme'        => 'Default',
+    // directory of the css, fonts and js files in the theme
+    'resourcesDirectory' => '/resources',
     // The language used by the application
-    'activeLanguage' => 'en_US',
+    'activeLanguage'     => 'en_US',
 ];

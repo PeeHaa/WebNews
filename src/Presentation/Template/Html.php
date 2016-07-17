@@ -6,6 +6,7 @@ use CodeCollab\Template\Html as BaseTemplate;
 use CodeCollab\Theme\Loader;
 use CodeCollab\I18n\Translator;
 use CodeCollab\CsrfToken\Token;
+use Minifine\Minifine;
 
 class Html extends BaseTemplate
 {
@@ -15,11 +16,14 @@ class Html extends BaseTemplate
 
     protected $csrfToken;
 
+    protected $minifier;
+
     public function __construct(
         string $basePage,
         Loader $theme,
         Translator $translator,
-        Token $csrfToken
+        Token $csrfToken,
+        Minifine $minifier
     )
     {
         parent::__construct($basePage);
@@ -27,6 +31,7 @@ class Html extends BaseTemplate
         $this->theme      = $theme;
         $this->translator = $translator;
         $this->csrfToken  = $csrfToken;
+        $this->minifier   = $minifier;
     }
 
     public function render(string $template, array $data = []): string
