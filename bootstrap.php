@@ -17,7 +17,7 @@ use FastRoute\RouteParser\Std as StdRouteParser;
 use FastRoute\DataGenerator;
 use FastRoute\DataGenerator\GroupCountBased as GroupCountBasedDataGenerator;
 use FastRoute\Dispatcher\GroupCountBased as RouteDispatcher;
-use CodeCollab\Template\Html;
+use WebNews\Presentation\Template\Html;
 use CodeCollab\Theme\Loader as ThemeLoader;
 use CodeCollab\Theme\Theme;
 use CodeCollab\I18n\Translator;
