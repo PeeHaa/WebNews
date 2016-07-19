@@ -3,6 +3,7 @@
 namespace PeeHaa\Nntp\Connection;
 
 use PeeHaa\Nntp\Endpoint\Endpoint;
+use PeeHaa\Nntp\Command\Command;
 
 class Connection
 {
@@ -36,5 +37,23 @@ class Connection
         }
 
         return fgets($this->stream);
+    }
+
+    public function sendCommand(Command $command)
+    {
+        if (fwrite($this->stream, $command->getCommand()) !== $command->getLength()) {
+            throw new TransferFailedException(sprintf('Unable to send command %s.'));
+        }
+    }
+
+    public function getResponse(): array
+    {
+        $response = trim($this->readLine());
+
+        if ($response === false) {
+            throw new TransferFailedException(sprintf('Unable to retrieve response.'));
+        }
+
+        return preg_split('/\s+/', $response, 2);
     }
 }
