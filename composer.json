@@ -13,7 +13,10 @@
         }
     ],
     "autoload": {
-        "psr-4": {"WebNews\\": "src/"}
+        "psr-4": {
+            "WebNews\\": "src/",
+            "PeeHaa\\Nntp\\": "lib/Nntp/"
+        }
     },
     "prefer-stable": true,
     "require": {
