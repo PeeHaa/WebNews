@@ -2,7 +2,7 @@
 
 namespace PeeHaa\Nntp\Command;
 
-class ListCommand extends Command
+class ListCommand implements Command
 {
     const COMMAND = 'LIST';
 
@@ -11,5 +11,10 @@ class ListCommand extends Command
     public function getCommand(): string
     {
         return self::COMMAND;
+    }
+
+    public function getSuccessCode(): int
+    {
+        return self::SUCCESS_CODE;
     }
 }
