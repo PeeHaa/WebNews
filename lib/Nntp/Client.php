@@ -4,6 +4,9 @@ namespace PeeHaa\Nntp;
 
 use PeeHaa\Nntp\Connection\Connection;
 use PeeHaa\Nntp\Command\Command;
+use PeeHaa\Nntp\Response\InvalidResponseException;
+use PeeHaa\Nntp\Response\StatusLine;
+use PeeHaa\Nntp\Response\Response;
 
 class Client
 {
@@ -14,10 +17,36 @@ class Client
         $this->connection = $connection;
     }
 
-    public function sendCommand(Command $command)
+    public function sendCommand(Command $command): Response
     {
-        $this->connection->sendCommand($command);
+        $this->connection->send($command->getCommand() . "\r\n");
 
-        var_dump($this->connection->getResponse());
+        $statusLine = new StatusLine($this->connection->readLine());
+
+        if ($statusLine->getStatusCode() !== $command->getSuccessCode()) {
+            throw new InvalidResponseException(sprintf(
+                'Expected status code %s, but got %s instead. Textual status: %s',
+                $command->getSuccessCode(),
+                $statusLine->getStatusCode(),
+                $statusLine->getMessage()
+            ));
+        }
+
+        return new Response($statusLine, $this->getData());
+    }
+
+    private function getData(): array
+    {
+        $lines = [];
+
+        while ($line = $this->connection->readLine()) {
+            if ($line === ".\r\n") {
+                break;
+            }
+
+            $lines[] = $line;
+        }
+
+        return $lines;
     }
 }
