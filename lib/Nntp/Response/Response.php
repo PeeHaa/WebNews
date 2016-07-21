@@ -13,4 +13,9 @@ class Response
         $this->statusLine = $statusLine;
         $this->data       = $data;
     }
+
+    public function getData(): array
+    {
+        return $this->data;
+    }
 }
