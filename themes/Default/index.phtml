@@ -1,40 +1,28 @@
 <?php declare(strict_types=1); ?>
 <div class="container">
     <div class="home-header">
-        <h1>#externals</h1>
-        <p>Opening PHP's #internals to the outside.</p>
+        <h1><?= $this->translate('project.title'); ?></h1>
+        <p><?= $this->translate('project.description'); ?></p>
     </div>
     <section id="threads">
         <table class="thread-list table table-striped table-hover">
             <tbody>
-                <tr>
-                    <td class="number-of-messages">
-                        <span class="badge badge-default">12</span>
-                    </td>
-                    <td>
-                        <a class="thread-subject" href="/design/thread">[RFC] New operator for context-dependent escaping</a>
-                        <br class="visible-xs">
-                        <small class="text-muted">
-                            2 hours ago
-                            - 12 emails
-                        </small>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="number-of-messages">
-                        <span class="badge badge-default">16</span>
-                    </td>
-                    <td>
-                        <a class="thread-subject" href="/design/thread">[RFC][VOTE] RNG fixes</a>
-                        <br class="visible-xs">
-                        <small class="text-muted">
-                            1 day ago
-                            - 16 emails
-                        </small>
-                    </td>
-                </tr>
+                <?php foreach ($this->groups as $group) { ?>
+                    <tr>
+                        <td class="number-of-messages">
+                            <span class="badge badge-default">N/A</span>
+                        </td>
+                        <td>
+                            <a class="thread-subject" href="/design/thread"><?= $this->escape($group); ?></a>
+                            <br class="visible-xs">
+                            <small class="text-muted">
+                                2 hours ago
+                                - 12 emails
+                            </small>
+                        </td>
+                    </tr>
+                <?php } ?>
             </tbody>
         </table>
-        <button id="show-more-threads" class="btn btn-default btn-block btn-lg">Show more</button>
     </div>
 </div>

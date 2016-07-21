@@ -4,6 +4,7 @@ namespace WebNews\Presentation\Controller;
 
 use CodeCollab\Http\Response\Response;
 use WebNews\Presentation\Template\Html;
+use WebNews\Storage\Nntp\Group;
 
 class Index
 {
@@ -14,9 +15,11 @@ class Index
         $this->response = $response;
     }
 
-    public function index(Html $template)
+    public function index(Html $template, Group $group)
     {
-        $this->response->setContent($template->renderPage('/index.phtml'));
+        $this->response->setContent($template->renderPage('/index.phtml', [
+            'groups' => $group->getAll(),
+        ]));
 
         return $this->response;
     }

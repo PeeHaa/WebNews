@@ -2,6 +2,7 @@
 
 $texts = [
     'project.title'                                         => 'WebNews',
+    'project.description'                                   => 'Experimental web-interface for PHP\'s news server.',
 
     'nav.login'                                             => 'Log in with GitHub',
     'nav.login.subtext'                                     => 'to track unread emails',
