@@ -2,21 +2,9 @@
 
 namespace PeeHaa\Nntp\Command;
 
-abstract class Command
+interface Command
 {
-    const COMMAND = 'LIST';
+    public function getCommand(): string;
 
-    const SUCCESS_CODE = 215;
-
-    abstract public function getCommand();
-
-    public function getLength(): int
-    {
-        return strlen($this->getCommand());
-    }
-
-    public function isCommandCompletelySent(int $bytesSent): bool
-    {
-        return $bytesSent === $this->getLength();
-    }
+    public function getSuccessCode(): int;
 }
