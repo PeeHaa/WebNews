@@ -30,6 +30,8 @@ use CodeCollab\CsrfToken\Storage\Storage as TokenStorage;
 use WebNews\Storage\TokenSession;
 use CodeCollab\CsrfToken\Generator\Generator as TokenGenerator;
 use CodeCollab\CsrfToken\Generator\RandomBytes32;
+use PeeHaa\Nntp\Endpoint\Endpoint;
+use PeeHaa\Nntp\Endpoint\Plain as PlainEndpoint;
 use CodeCollab\Router\FrontController;
 
 /**
@@ -147,6 +149,12 @@ $auryn->define(FileTranslator::class, [
 $auryn->alias(Token::class, CsrfToken::class);
 $auryn->alias(TokenStorage::class, TokenSession::class);
 $auryn->alias(TokenGenerator::class, RandomBytes32::class);
+
+/**
+ * Setup the NNTP client
+ */
+$auryn->alias(Endpoint::class, PlainEndpoint::class);
+$auryn->define(Endpoint::class, [':hostname' => 'news.php.net']);
 
 /**
  * Load the routes
