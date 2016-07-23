@@ -5,17 +5,17 @@
         <p><?= $this->translate('project.description'); ?></p>
     </div>
     <section id="threads">
-        <div class=""row>
+        <div class="row">
             <div class="col-md-6">
                 <table class="thread-list table table-striped table-hover">
                     <tbody>
-                        <?php foreach ($this->groups as $index => /** @var \WebNews\Nntp\Group $group */ $group) { ?>
+                        <?php foreach ($this->groups as $index => $group) { ?>
                             <tr>
                                 <td class="number-of-messages">
                                     <span class="badge badge-default">N/A</span>
                                 </td>
                                 <td>
-                                    <a class="thread-subject" href="/design/thread"><?= $this->escape($group->getName()); ?></a>
+                                    <a class="thread-subject" href="/<?= $this->escape(rawurlencode($group->getName())); ?>"><?= $this->escape($group->getName()); ?></a>
                                     <br class="visible-xs">
                                     <small class="text-muted">
                                         2 hours ago
