@@ -1,0 +1,36 @@
+<?php declare(strict_types=1); ?>
+<section class="container">
+    <div class="home-header">
+        <h1><?= $this->escape('project.title'); ?></h1>
+        <p><?= $this->translate('project.description'); ?></p>
+    </div>
+    <section id="threads">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="thread-list table table-striped table-hover">
+                    <tbody>
+                        <?php foreach ($this->groups as $index => $group) { ?>
+                            <tr>
+                                <td class="number-of-messages">
+                                    <span class="badge badge-default">N/A</span>
+                                </td>
+                                <td>
+                                    <a class="thread-subject" href="/<?= $this->escape(rawurlencode($group->getName())); ?>"><?= $this->escape($group->getName()); ?></a>
+                                    <br class="visible-xs">
+                                    <small class="text-muted">
+                                        2 hours ago
+                                        - <?= $this->translate('page.groups.overview.group.messages.%', [$group->getNumberOfMessages()]); ?>
+                                    </small>
+                                </td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h2>Todo</h2>
+                <p>Filters / search/ last messages here?</p>
+            </div>
+        </div>
+    </section>
+</section>
