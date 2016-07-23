@@ -24,6 +24,9 @@
             <div class="container">
                 <ul>
                     <li><a href="/"><?= $this->translate('project.title'); ?></a></li>
+                    <?php if (isset($this->group)) { ?>
+                        <li> / <a href="/<?= $this->escape(rawurlencode($this->group)); ?>"><?= $this->escape($this->group); ?></a></li>
+                    <?php } ?>
                 </ul>
                 <div class="account">
                     <span class="fa fa-github"></span>
