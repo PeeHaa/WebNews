@@ -32,6 +32,10 @@ class Client
             ));
         }
 
+        if ($statusLine->getStatusCode() === 211) {
+            return new Response($statusLine);
+        }
+
         return new Response($statusLine, $this->getData());
     }
 
@@ -44,7 +48,7 @@ class Client
                 break;
             }
 
-            $lines[] = $line;
+            $lines[] = trim($line);
         }
 
         return $lines;
