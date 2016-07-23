@@ -4,6 +4,7 @@ namespace WebNews\Storage\Nntp;
 
 use PeeHaa\Nntp\Client;
 use PeeHaa\Nntp\Command\ListCommand;
+use WebNews\Nntp\Groups;
 
 class Group
 {
@@ -14,10 +15,10 @@ class Group
         $this->client = $client;
     }
 
-    public function getAll(): array
+    public function getAll(): Groups
     {
         $response = $this->client->sendCommand(new ListCommand());
 
-        return $response->getData();
+        return new Groups($response->getData());
     }
 }
