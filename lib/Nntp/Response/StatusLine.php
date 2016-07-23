@@ -25,6 +25,6 @@ class StatusLine
 
     public function getMessage(): string
     {
-        return $this->getMessage();
+        return $this->message;
     }
 }
