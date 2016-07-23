@@ -67,6 +67,10 @@ header.site-header ul {
     float: left;
 }
 
+header.site-header ul li {
+    display: inline-block;
+}
+
 header.site-header ul li a {
     display: inline-block;
     height: 40px;
