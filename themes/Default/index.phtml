@@ -1,28 +1,36 @@
 <?php declare(strict_types=1); ?>
-<div class="container">
+<section class="container">
     <div class="home-header">
         <h1><?= $this->translate('project.title'); ?></h1>
         <p><?= $this->translate('project.description'); ?></p>
     </div>
     <section id="threads">
-        <table class="thread-list table table-striped table-hover">
-            <tbody>
-                <?php foreach ($this->groups as $group) { ?>
-                    <tr>
-                        <td class="number-of-messages">
-                            <span class="badge badge-default">N/A</span>
-                        </td>
-                        <td>
-                            <a class="thread-subject" href="/design/thread"><?= $this->escape($group->getName()); ?></a>
-                            <br class="visible-xs">
-                            <small class="text-muted">
-                                2 hours ago
-                                - 12 emails
-                            </small>
-                        </td>
-                    </tr>
-                <?php } ?>
-            </tbody>
-        </table>
-    </div>
-</div>
+        <div class=""row>
+            <div class="col-md-6">
+                <table class="thread-list table table-striped table-hover">
+                    <tbody>
+                        <?php foreach ($this->groups as $index => /** @var \WebNews\Nntp\Group $group */ $group) { ?>
+                            <tr>
+                                <td class="number-of-messages">
+                                    <span class="badge badge-default">N/A</span>
+                                </td>
+                                <td>
+                                    <a class="thread-subject" href="/design/thread"><?= $this->escape($group->getName()); ?></a>
+                                    <br class="visible-xs">
+                                    <small class="text-muted">
+                                        2 hours ago
+                                        - <?= $this->translate('page.groups.overview.group.messages.%', [$group->getNumberOfMessages()]); ?>
+                                    </small>
+                                </td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h2>Todo</h2>
+                <p>Filters / search/ last messages here?</p>
+            </div>
+        </div>
+    </section>
+</section>
