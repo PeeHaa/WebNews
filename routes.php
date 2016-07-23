@@ -8,6 +8,7 @@ use WebNews\Presentation\Controller\Design;
 use WebNews\Presentation\Controller\Resource;
 use WebNews\Presentation\Controller\Error;
 use WebNews\Presentation\Controller\Index;
+use WebNews\Presentation\Controller\Group;
 
 /** @var Injector $auryn */
 $router = $auryn->make(Router::class);
@@ -21,6 +22,7 @@ $router
     ->get('/method-not-allowed', [Error::class, 'methodNotAllowed'])
 
     ->get('/', [Index::class, 'index'])
+    ->get('/{group}', [Group::class, 'showThreads'])
 
     ->get('/design/thread', [Design::class, 'thread'])
 ;

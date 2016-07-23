@@ -31,7 +31,7 @@
     array (
       0 => 
       array (
-        'regex' => '~^(?|/js/(.+)|/css/(.+)()|/fonts/(.+)()())$~',
+        'regex' => '~^(?|/js/(.+)|/css/(.+)()|/fonts/(.+)()()|/([^/]+)()()())$~',
         'routeMap' => 
         array (
           2 => 
@@ -68,6 +68,18 @@
             1 => 
             array (
               'filename' => 'filename',
+            ),
+          ),
+          5 => 
+          array (
+            0 => 
+            array (
+              0 => 'WebNews\\Presentation\\Controller\\Group',
+              1 => 'showThreads',
+            ),
+            1 => 
+            array (
+              'group' => 'group',
             ),
           ),
         ),
