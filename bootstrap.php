@@ -45,17 +45,37 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config/config.php';
 
 /**
+ * Setup DI
+ */
+$auryn = new Auryn();
+$auryn->share($auryn); // yolo
+
+/**
+ * Setup the NNTP client
+ */
+$auryn->alias(Endpoint::class, PlainEndpoint::class);
+$auryn->define(Endpoint::class, [':hostname' => 'news.php.net']);
+
+/**
+ * Setup the database connection
+ */
+$auryn->share(\PDO::class);
+/** @var array $configuration */
+$auryn->delegate(\PDO::class, function() use ($configuration) {
+    $dbConnection = new \PDO($configuration['dbDsn'], $configuration['dbUsername'], $configuration['dbPassword']);
+    $dbConnection->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+    $dbConnection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+    $dbConnection->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+
+    return $dbConnection;
+});
+
+/**
  * Prevent further execution when on CLI
  */
 if (php_sapi_name() === 'cli') {
     return;
 }
-
-/**
- * Setup DI
- */
-$auryn = new Auryn();
-$auryn->share($auryn); // yolo
 
 /**
  * Setup encryption
@@ -105,7 +125,6 @@ $cacheFile = __DIR__ . '/cache/routes.php';
 $auryn->share(Router::class);
 $auryn->alias(RouteParser::class, StdRouteParser::class);
 $auryn->alias(DataGenerator::class, GroupCountBasedDataGenerator::class);
-/** @var array $configuration */
 $auryn->define(Router::class, [
     ':dispatcherFactory' => function($dispatchData) {
         return new RouteDispatcher($dispatchData);
@@ -149,12 +168,6 @@ $auryn->define(FileTranslator::class, [
 $auryn->alias(Token::class, CsrfToken::class);
 $auryn->alias(TokenStorage::class, TokenSession::class);
 $auryn->alias(TokenGenerator::class, RandomBytes32::class);
-
-/**
- * Setup the NNTP client
- */
-$auryn->alias(Endpoint::class, PlainEndpoint::class);
-$auryn->define(Endpoint::class, [':hostname' => 'news.php.net']);
 
 /**
  * Load the routes
