@@ -4,7 +4,7 @@ namespace WebNews\Presentation\Controller;
 
 use CodeCollab\Http\Response\Response;
 use WebNews\Presentation\Template\Html;
-use WebNews\Storage\Nntp\Group;
+use WebNews\Storage\Postgres\Group;
 
 class Index
 {

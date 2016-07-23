@@ -10,5 +10,6 @@ $texts = [
     'footer.project'                                        => 'Contribute to the project on GitHub:',
     'footer.upstream'                                       => 'Inspired by and design stolen from:',
 
-    'page.groups.overview.group.messages.%'                 => '%d messages',
+    'page.groups.overview.group.empty'                      => 'No messages',
+    'page.groups.overview.group.threads.%'                  => '%d threads',
 ];

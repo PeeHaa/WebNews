@@ -18,8 +18,13 @@
                                     <a class="thread-subject" href="/<?= $this->escape(rawurlencode($group->getName())); ?>"><?= $this->escape($group->getName()); ?></a>
                                     <br class="visible-xs">
                                     <small class="text-muted">
-                                        2 hours ago
-                                        - <?= $this->translate('page.groups.overview.group.messages.%', [$group->getNumberOfMessages()]); ?>
+                                        <?php if ($group->getNumberOfThreads()) { ?>
+                                            <time-ago datetime="<?= $group->getTimestamp()->format('c'); ?>"><?= $group->getTimestamp()->format('M j, Y'); ?></time-ago>
+                                            -
+                                            <?= $this->translate('page.groups.overview.group.threads.%', [$group->getNumberOfThreads()]); ?>
+                                        <?php } else { ?>
+                                            <?= $this->translate('page.groups.overview.group.empty'); ?>
+                                        <?php } ?>
                                     </small>
                                 </td>
                             </tr>
