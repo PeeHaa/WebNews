@@ -8,10 +8,15 @@ class Response
 
     private $data;
 
-    public function __construct(StatusLine $statusLine, array $data)
+    public function __construct(StatusLine $statusLine, array $data = [])
     {
         $this->statusLine = $statusLine;
         $this->data       = $data;
+    }
+
+    public function getStatusMessage(): string
+    {
+        return $this->statusLine->getMessage();
     }
 
     public function getData(): array
