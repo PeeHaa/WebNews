@@ -11,4 +11,8 @@ $configuration = [
     'resourcesDirectory' => '/resources',
     // The language used by the application
     'activeLanguage'     => 'en_US',
+    // data connection details
+    'dbDsn'              => 'dsn string',
+    'dbUsername'         => 'database user',
+    'dbPassword'         => 'database password',
 ];
