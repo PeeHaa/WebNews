@@ -2,6 +2,7 @@
 
 namespace WebNews\Cli;
 
+use Auryn\Injector;
 use PeeHaa\Nntp\Connection\Connection;
 use PeeHaa\Nntp\Endpoint\Plain;
 use PeeHaa\Nntp\Client;
@@ -13,6 +14,7 @@ use PeeHaa\Nntp\Command\XOver;
 use PeeHaa\Nntp\Result\XOverArticleCollection;
 use WebNews\Storage\Postgres\Thread;
 use WebNews\Storage\Postgres\Article;
+use PeeHaa\Nntp\Result\InvalidResultException;
 
 require_once __DIR__ . '/../bootstrap.php';
 
@@ -33,34 +35,73 @@ foreach ($listResults as $listResult) {
 }
 
 /**
+ * Create threads
+ */
+function createThreads($articleResult, $threadStorage, $listResult, $articleStorage) {
+    if ($articleResult->startsNewThread()) {
+        $threadId = $threadStorage->create($listResult, $articleResult);
+    } else {
+        $threadId = $threadStorage->findByReference($articleResult);
+
+        // could not find the reference?
+        if ($threadId === 0) {
+            $threadId = $threadStorage->create($listResult, $articleResult);
+        }
+    }
+
+    $articleStorage->create($threadId, $articleResult);
+}
+
+/**
  * Do stuff
  */
 $threadStorage  = $auryn->make(Thread::class);
 $articleStorage = $auryn->make(Article::class);
 
 foreach ($listResults as $groupIndex => $listResult) {
-    if ($groupIndex > 0) {
-        break;
+    if ($groupIndex < 3) {
+        continue;
     }
 
     $client->sendCommand(new GroupCommand($listResult->getName()));
 
-    $xOverResult    = $client->sendCommand(new XOver(1, 200));
-    $articleResults = new XOverArticleCollection($xOverResult->getData());
+    $start = $listResult->getLowWatermark();
 
-    foreach ($articleResults as $articleResult) {
-        //var_dump($articleResult);
-        if ($articleResult->startsNewThread()) {
-            $threadId = $threadStorage->create($listResult, $articleResult);
-        } else {
-            $threadId = $threadStorage->findByReference($articleResult);
+    do {
+        if ($start < 34401) {
+            $start += 200;
 
-            // could not find the reference?
-            if ($threadId === 0) {
-                $threadId = $threadStorage->create($listResult, $articleResult);
+            continue;
+        }
+
+        sleep(10);
+
+        echo "Retrieving article $start to " . ($start + 200) . " of group {$listResult->getName()} with index $groupIndex" . PHP_EOL;
+
+        $xOverResult = $client->sendCommand(new XOver($start, $start + 200));
+
+        try {
+            $articleResults = new XOverArticleCollection($xOverResult->getData());
+        } catch (InvalidResultException $e) {
+            var_dump('ERROR: Message could not be parsed.');
+        }
+
+        foreach ($articleResults as $articleResult) {
+            if ($threadStorage->articleExists($articleResult)) {
+                continue;
+            }
+
+            try {
+                var_dump($articleResult->getWatermark() . ' :: ' . $articleResult->getSubject());
+
+                createThreads($articleResult, $threadStorage, $listResult, $articleStorage);
+            } catch(\Throwable $e) {
+                var_dump($articleResult);
+
+                throw $e;
             }
         }
 
-        $articleStorage->create($threadId, $articleResult);
-    }
+        $start += 200;
+    } while($start <= $listResult->getHighWatermark());
 }
