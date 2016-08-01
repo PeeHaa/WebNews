@@ -4,6 +4,7 @@ namespace WebNews\Storage\Postgres;
 
 use PeeHaa\Nntp\Result\ListGroup;
 use PeeHaa\Nntp\Result\XOverArticle;
+use WebNews\Domain\ThreadCollection;
 
 class Thread
 {
@@ -42,5 +43,79 @@ class Thread
         ]);
 
         return (int) $stmt->fetchColumn(0);
+    }
+
+    public function articleExists(XOverArticle $article): bool
+    {
+        $query = 'SELECT COUNT(id)';
+        $query.= ' FROM messages';
+        $query.= ' WHERE id = :id';
+
+        $stmt = $this->dbConnection->prepare($query);
+        $stmt->execute([
+            'id' => $article->getMessageId(),
+        ]);
+
+        return (bool) $stmt->fetchColumn(0);
+    }
+
+    public function getThreadsByGroup(string $group): ThreadCollection
+    {
+        $query = 'SELECT threads.id, threads.subject';
+        $query.= ' FROM threads';
+        $query.= ' WHERE threads.group = :group';
+        $query.= ' ORDER BY id DESC';
+        $query.= ' LIMIT 50 OFFSET 0';
+
+        $stmt = $this->dbConnection->prepare($query);
+        $stmt->execute([
+            'group' => $group,
+        ]);
+
+        $threads = array_column($stmt->fetchAll(), null, 'id');
+        $threads = $this->addNumberOfMessages($threads);
+        $threads = $this->addTimestampOfLastMessage($threads);
+
+        return new ThreadCollection($threads);
+    }
+
+    private function addNumberOfMessages(array $threads): array
+    {
+        $inQuery = implode(',', array_fill(0, count($threads), '?'));
+
+        $query = 'SELECT thread, COUNT(thread)';
+        $query.= ' FROM messages';
+        $query.= ' WHERE thread IN (' . $inQuery . ')';
+        $query.= ' GROUP BY thread';
+
+        $stmt = $this->dbConnection->prepare($query);
+        $stmt->execute(array_keys($threads));
+
+        foreach ($stmt->fetchAll() as $tally) {
+            $threads[$tally['thread']]['numberOfMessages'] = $tally['count'];
+        }
+
+        return $threads;
+    }
+
+    private function addTimestampOfLastMessage(array $threads): array
+    {
+        $inQuery = implode(',', array_fill(0, count($threads), '?'));
+
+        $query = 'SELECT messages.thread, MAX(messages.timestamp) as timestamp';
+        $query.= ' FROM messages';
+        $query.= ' JOIN threads ON threads.id = messages.thread';
+        $query.= ' JOIN groups ON groups.name = threads.group';
+        $query.= ' WHERE thread IN (' . $inQuery . ')';
+        $query.= ' GROUP BY messages.thread';
+
+        $stmt = $this->dbConnection->prepare($query);
+        $stmt->execute(array_keys($threads));
+
+        foreach ($stmt->fetchAll() as $tally) {
+            $threads[$tally['thread']]['timestamp'] = $tally['timestamp'];
+        }
+
+        return $threads;
     }
 }

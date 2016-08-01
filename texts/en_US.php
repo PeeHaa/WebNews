@@ -12,4 +12,7 @@ $texts = [
 
     'page.groups.overview.group.empty'                      => 'No messages',
     'page.groups.overview.group.threads.%'                  => '%d threads',
+
+    'page.threads.overview.thread.empty'                    => 'No messages',
+    'page.threads.overview.thread.messages.%'               => '%d messages',
 ];

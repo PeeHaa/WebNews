@@ -1,35 +1,35 @@
 <?php declare(strict_types=1); ?>
 <section class="container">
     <div class="home-header">
-        <h1><?= $this->escape('project.title'); ?></h1>
-        <p><?= $this->translate('project.description'); ?></p>
+        <h1><?= $this->escape($this->group); ?></h1>
     </div>
     <section id="threads">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <table class="thread-list table table-striped table-hover">
                     <tbody>
-                        <?php foreach ($this->groups as $index => $group) { ?>
+                        <?php foreach ($this->threads as $index => $thread) { ?>
                             <tr>
                                 <td class="number-of-messages">
                                     <span class="badge badge-default">N/A</span>
                                 </td>
                                 <td>
-                                    <a class="thread-subject" href="/<?= $this->escape(rawurlencode($group->getName())); ?>"><?= $this->escape($group->getName()); ?></a>
+                                    <a class="thread-subject" href="/<?= $this->escape(rawurlencode($thread->getSubject())); ?>"><?= $this->escape($thread->getSubject()); ?></a>
                                     <br class="visible-xs">
                                     <small class="text-muted">
-                                        2 hours ago
-                                        - <?= $this->translate('page.groups.overview.group.messages.%', [$group->getNumberOfMessages()]); ?>
+                                        <?php if ($thread->getNumberOfMessages()) { ?>
+                                            <time-ago datetime="<?= $thread->getTimestamp()->format('c'); ?>"><?= $thread->getTimestamp()->format('M j, Y'); ?></time-ago>
+                                            -
+                                            <?= $this->translate('page.threads.overview.thread.messages.%', [$thread->getNumberOfMessages()]); ?>
+                                        <?php } else { ?>
+                                            <?= $this->translate('page.threads.overview.thread.empty'); ?>
+                                        <?php } ?>
                                     </small>
                                 </td>
                             </tr>
                         <?php } ?>
                     </tbody>
                 </table>
-            </div>
-            <div class="col-md-6">
-                <h2>Todo</h2>
-                <p>Filters / search/ last messages here?</p>
             </div>
         </div>
     </section>
