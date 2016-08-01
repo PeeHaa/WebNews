@@ -113,4 +113,18 @@ class Group
 
         return $groups;
     }
+
+    public function exists(string $name): bool
+    {
+        $query = 'SELECT COUNT(name)';
+        $query.= ' FROM groups';
+        $query.= ' WHERE name = :name';
+
+        $stmt = $this->dbConnection->prepare($query);
+        $stmt->execute([
+            'name' => $name,
+        ]);
+
+        return (bool) $stmt->fetchColumn(0);
+    }
 }
