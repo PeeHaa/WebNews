@@ -26,9 +26,13 @@ class XOverArticle
     {
         $xOverInformation = explode("\t", $xOverLine);
 
+        if (count($xOverInformation) !== 9 || !$xOverInformation[3]) {
+            throw new InvalidResultException('Invalid message');
+        }
+
         $this->watermark  = (int) $xOverInformation[0];
-        $this->subject    = $xOverInformation[1];
-        $this->author     = new Author($xOverInformation[2]);
+        $this->subject    = $this->replaceBrokenCharacters($xOverInformation[1]);
+        $this->author     = new Author($this->replaceBrokenCharacters($xOverInformation[2]));
         $this->timestamp  = $this->buildTimestamp($xOverInformation[3]);
         $this->messageId  = trim($xOverInformation[4], '<>');
         $this->references = trim($xOverInformation[5]) ? explode('><', trim($xOverInformation[5], '<>')) : [];
@@ -39,11 +43,25 @@ class XOverArticle
 
     private function buildTimestamp(string $timestamp): \DateTimeImmutable
     {
-        preg_match('~(\d{1,2}) ([a-z]{3}) (\d{4}) (\d{1,2}:\d{2}:\d{2}) ([\-+]?\d{4})~i', $timestamp, $matches);
+        preg_match('~(\d{1,2}) ([a-z]{3}) (\d{2,4}) (\d{1,2}:\d{2}:\d{2})(?: ([\-+]?\d{4}))?~i', $timestamp, $matches);
 
-        $formattedTimestamp = sprintf('%s %s %s %s %s', $matches[1], $matches[2], $matches[3], $matches[4], $matches[5]);
+        $year     = strlen($matches[3]) === 4 ? $matches[3] : '19' . $matches[3];
+        $timezone = $matches[5] ?? '+0000';
+
+        $formattedTimestamp = sprintf('%s %s %s %s %s', $matches[1], $matches[2], $year, $matches[4], $timezone);
 
         return \DateTimeImmutable::createFromFormat('j M Y H:i:s O', $formattedTimestamp);
+    }
+
+    private function replaceBrokenCharacters(string $data): string
+    {
+        $data = preg_replace('~\x{FFFD}~u', ' ', $data);
+
+        $data = preg_replace_callback('~[\\xA1-\\xFF](?![\\x80-\\xBF]{2,})~', function($matches) {
+            return utf8_encode($matches[0]);
+        }, $data);
+
+        return $data;
     }
 
     public function getWatermark(): int
