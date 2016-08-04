@@ -55,6 +55,12 @@ class XOverArticle
 
     private function replaceBrokenCharacters(string $data): string
     {
+        $convertedData = iconv('utf-8', 'utf-8', $data);
+
+        if ($convertedData !== false) {
+            return $convertedData;
+        }
+
         $data = preg_replace('~\x{FFFD}~u', ' ', $data);
 
         $data = preg_replace_callback('~[\\xA1-\\xFF](?![\\x80-\\xBF]{2,})~', function($matches) {
