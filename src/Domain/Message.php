@@ -10,6 +10,8 @@ class Message
 
     private $watermark;
 
+    private $body;
+
     private $author;
 
     private $timestamp;
@@ -19,6 +21,7 @@ class Message
         $this->id        = (int) $message['id'];
         $this->threadId  = (int) $message['thread'];
         $this->watermark = (int) $message['watermark'];
+        $this->body      = $message['body'];
         $this->author    = new Author($message['author_name'], $message['author_emailaddress']);
         $this->timestamp = isset($message['timestamp']) ? new \DateTimeImmutable($message['timestamp']) : null;
     }
@@ -36,6 +39,11 @@ class Message
     public function getWatermark(): int
     {
         return $this->watermark;
+    }
+
+    public function getBody(): string
+    {
+        return $this->body;
     }
 
     public function getAuthorName(): string
