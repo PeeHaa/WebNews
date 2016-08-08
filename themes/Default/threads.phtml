@@ -14,7 +14,7 @@
                                     <span class="badge badge-default">N/A</span>
                                 </td>
                                 <td>
-                                    <a class="thread-subject" href="/<?= $this->escape(rawurlencode($thread->getSubject())); ?>"><?= $this->escape($thread->getSubject()); ?></a>
+                                    <a class="thread-subject" href="/<?= $this->escape($this->group); ?>/<?= $thread->getId(); ?>/<?= $this->escape($this->buildUrlPath($thread->getSubject())); ?>"><?= $this->escape($thread->getSubject()); ?></a>
                                     <br class="visible-xs">
                                     <small class="text-muted">
                                         <?php if ($thread->getNumberOfMessages()) { ?>

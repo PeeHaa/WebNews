@@ -9,6 +9,7 @@ use WebNews\Presentation\Controller\Resource;
 use WebNews\Presentation\Controller\Error;
 use WebNews\Presentation\Controller\Index;
 use WebNews\Presentation\Controller\Group;
+use WebNews\Presentation\Controller\Thread;
 
 /** @var Injector $auryn */
 $router = $auryn->make(Router::class);
@@ -23,6 +24,7 @@ $router
 
     ->get('/', [Index::class, 'index'])
     ->get('/{group}', [Group::class, 'showThreads'])
+    ->get('/{group}/{threadId}/{_threadName}', [Thread::class, 'showMessages'])
 
-    ->get('/design/thread', [Design::class, 'thread'])
+    //->get('/design/thread', [Design::class, 'thread'])
 ;
