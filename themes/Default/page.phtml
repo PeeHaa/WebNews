@@ -27,6 +27,9 @@
                     <?php if (isset($this->group)) { ?>
                         <li> / <a href="/<?= $this->escape(rawurlencode($this->group)); ?>"><?= $this->escape($this->group); ?></a></li>
                     <?php } ?>
+                    <?php if (isset($this->thread)) { ?>
+                        <li> / <a href="/<?= $this->escape(rawurlencode($this->group)); ?>/<?= $this->thread->getId(); ?>/<?= $this->escape($this->buildUrlPath($this->thread->getSubject())); ?>"><?= $this->escape($this->thread->getSubject()); ?></a></li>
+                    <?php } ?>
                 </ul>
                 <div class="account">
                     <span class="fa fa-github"></span>
