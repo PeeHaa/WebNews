@@ -43,6 +43,11 @@ class Message
         return $this->author->getName();
     }
 
+    public function getAuthorGravatarHash(): string
+    {
+        return $this->author->getGravatarHash();
+    }
+
     public function getAuthorEmailAddress(): string
     {
         return $this->author->getEmailAddress();

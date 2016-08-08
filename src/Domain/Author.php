@@ -23,4 +23,9 @@ class Author
     {
         return $this->emailAddress;
     }
+
+    public function getGravatarHash(): string
+    {
+        return md5(strtolower($this->emailAddress));
+    }
 }
