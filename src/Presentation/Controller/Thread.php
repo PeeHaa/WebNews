@@ -17,7 +17,13 @@ class Thread
         $this->response = $response;
     }
 
-    public function showMessages(Html $template, GroupStorage $group, ThreadStorage $thread, string $selectedGroup, string $threadId)
+    public function showMessages(
+        Html $template,
+        GroupStorage $group,
+        ThreadStorage $thread,
+        string $selectedGroup,
+        string $threadId
+    )
     {
         if (!$group->exists($selectedGroup) || !$thread->exists((int) $threadId)) {
             $this->response->setContent($template->renderPage('/error/not-found.phtml'));
