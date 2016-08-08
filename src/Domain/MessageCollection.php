@@ -9,11 +9,11 @@ class MessageCollection implements \Iterator
     public function __construct(array $messages)
     {
         foreach ($messages as $message) {
-            $this->messages[] = new Thread($message);
+            $this->messages[] = new Message($message);
         }
     }
 
-    public function current(): Thread
+    public function current(): Message
     {
         return current($this->messages);
     }
