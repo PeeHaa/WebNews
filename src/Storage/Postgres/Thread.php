@@ -155,7 +155,7 @@ class Thread
 
     public function getMessages(int $id): MessageCollection
     {
-        $query = 'SELECT id, thread, watermark, author_name, author_emailaddress, timestamp';
+        $query = 'SELECT id, thread, watermark, author_name, author_emailaddress, timestamp, body';
         $query.= ' FROM messages';
         $query.= ' WHERE thread = :thread';
         $query.= ' ORDER BY watermark ASC';

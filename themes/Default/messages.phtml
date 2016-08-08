@@ -18,7 +18,7 @@
                 </header>
                 <div id="message-<?= $message->getWatermark(); ?>-body" class="collapse in">
                     <div class="email-content">
-                        Message content here...
+                        <?= nl2br($this->escape($message->getBody())); ?>
                     </div>
                 </div>
             </article>
