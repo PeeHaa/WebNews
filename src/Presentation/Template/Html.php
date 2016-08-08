@@ -61,4 +61,14 @@ class Html extends BaseTemplate
     {
         return $this->translator->translate($key, $data);
     }
+
+    protected function buildUrlPath(string $content): string
+    {
+        $path = iconv('utf-8', 'iso-8859-1//TRANSLIT', $content);
+        $path = preg_replace('~[^A-Za-z0-9\-]~', '-', $path);
+        $path = preg_replace('~-{2,}~', '-', $path);
+        $path = trim($path, '-');
+
+        return $path;
+    }
 }
