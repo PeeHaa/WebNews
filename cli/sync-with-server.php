@@ -15,6 +15,8 @@ use PeeHaa\Nntp\Result\XOverArticleCollection;
 use WebNews\Storage\Postgres\Thread;
 use WebNews\Storage\Postgres\Article;
 use PeeHaa\Nntp\Result\InvalidResultException;
+use PeeHaa\Nntp\Command\Article as ArticleCommand;
+use PeeHaa\Nntp\Result\Article as ArticleContentResult;
 
 require_once __DIR__ . '/../bootstrap.php';
 
@@ -37,7 +39,7 @@ foreach ($listResults as $listResult) {
 /**
  * Create threads
  */
-function createThreads($articleResult, $threadStorage, $listResult, $articleStorage) {
+function createThreads($articleResult, $articleContentResult, $threadStorage, $listResult, $articleStorage) {
     if ($articleResult->startsNewThread()) {
         $threadId = $threadStorage->create($listResult, $articleResult);
     } else {
@@ -49,7 +51,7 @@ function createThreads($articleResult, $threadStorage, $listResult, $articleStor
         }
     }
 
-    $articleStorage->create($threadId, $articleResult);
+    $articleStorage->create($threadId, $articleResult, $articleContentResult);
 }
 
 /**
@@ -60,18 +62,18 @@ $articleStorage = $auryn->make(Article::class);
 
 foreach ($listResults as $groupIndex => $listResult) {
     if ($groupIndex < 3) {
-        continue;
+        //continue;
     }
-
+//var_dump($listResult->getName());
     $client->sendCommand(new GroupCommand($listResult->getName()));
 
     $start = $listResult->getLowWatermark();
 
     do {
         if ($start < 34401) {
-            $start += 200;
+            //$start += 200;
 
-            continue;
+            //continue;
         }
 
         sleep(10);
@@ -94,7 +96,10 @@ foreach ($listResults as $groupIndex => $listResult) {
             try {
                 var_dump($articleResult->getWatermark() . ' :: ' . $articleResult->getSubject());
 
-                createThreads($articleResult, $threadStorage, $listResult, $articleStorage);
+                $article = $client->sendCommand(new ArticleCommand($articleResult->getWatermark()));
+                $articleContentResult = new ArticleContentResult($article->getData());
+
+                createThreads($articleResult, $articleContentResult, $threadStorage, $listResult, $articleStorage);
             } catch(\Throwable $e) {
                 var_dump($articleResult);
 
