@@ -1,0 +1,27 @@
+<?php declare(strict_types=1); ?>
+<div class="container">
+    <div class="home-header">
+        <h1><?= $this->escape($this->thread->getSubject()); ?></h1>
+    </div>
+    <section class="thread">
+        <?php foreach ($this->messages as $message) { ?>
+            <article id="message-<?= $message->getWatermark(); ?>" class="clearfix unread">
+                <header>
+                    <a href="#message-<?= $message->getWatermark(); ?>-body" role="button" data-toggle="collapse"><span class="fa fa-angle-down"></span></a>
+                    <img class="avatar" src="https://secure.gravatar.com/avatar/<?= $this->escape($message->getAuthorGravatarHash()); ?>?d=retro&amp;s=50" alt="<?= $this->escape($message->getAuthorName()); ?>" title="<?= $this->escape($message->getAuthorName()); ?>">
+                    <span class="hidden-xs">Posted</span>
+                    <a class="email-date" href="#message-<?= $message->getWatermark(); ?>">
+                        <time-ago datetime="<?= $message->getTimestamp()->format('c'); ?>"><?= $message->getTimestamp()->format('M j, Y'); ?></time-ago>
+                    </a>
+                    by <strong><?= $this->escape($message->getAuthorName()); ?></strong>
+                    <div class="label label-primary">unread</div>
+                </header>
+                <div id="message-<?= $message->getWatermark(); ?>-body" class="collapse in">
+                    <div class="email-content">
+                        Message content here...
+                    </div>
+                </div>
+            </article>
+        <?php } ?>
+    </section>
+</div>

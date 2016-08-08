@@ -18,11 +18,6 @@
         0 => 'WebNews\\Presentation\\Controller\\Index',
         1 => 'index',
       ),
-      '/design/thread' => 
-      array (
-        0 => 'WebNews\\Presentation\\Controller\\Design',
-        1 => 'thread',
-      ),
     ),
   ),
   1 => 
@@ -31,7 +26,7 @@
     array (
       0 => 
       array (
-        'regex' => '~^(?|/js/(.+)|/css/(.+)()|/fonts/(.+)()()|/([^/]+)()()())$~',
+        'regex' => '~^(?|/js/(.+)|/css/(.+)()|/fonts/(.+)()()|/([^/]+)()()()|/([^/]+)/([^/]+)/([^/]+)()())$~',
         'routeMap' => 
         array (
           2 => 
@@ -80,6 +75,20 @@
             1 => 
             array (
               'group' => 'group',
+            ),
+          ),
+          6 => 
+          array (
+            0 => 
+            array (
+              0 => 'WebNews\\Presentation\\Controller\\Thread',
+              1 => 'showMessages',
+            ),
+            1 => 
+            array (
+              'group' => 'group',
+              'threadId' => 'threadId',
+              '_threadName' => '_threadName',
             ),
           ),
         ),

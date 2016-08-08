@@ -5,6 +5,8 @@ namespace WebNews\Storage\Postgres;
 use PeeHaa\Nntp\Result\ListGroup;
 use PeeHaa\Nntp\Result\XOverArticle;
 use WebNews\Domain\ThreadCollection;
+use WebNews\Domain\Thread as ThreadObject;
+use WebNews\Domain\MessageCollection;
 
 class Thread
 {
@@ -117,5 +119,52 @@ class Thread
         }
 
         return $threads;
+    }
+
+    public function exists(int $id): bool
+    {
+        $query = 'SELECT COUNT(id)';
+        $query.= ' FROM threads';
+        $query.= ' WHERE id = :id';
+
+        $stmt = $this->dbConnection->prepare($query);
+        $stmt->execute([
+            'id' => $id,
+        ]);
+
+        return (bool) $stmt->fetchColumn(0);
+    }
+
+    public function getInfo(int $id): ThreadObject
+    {
+        $query = 'SELECT threads.id, threads.subject';
+        $query.= ' FROM threads';
+        $query.= ' WHERE threads.id = :id';
+
+        $stmt = $this->dbConnection->prepare($query);
+        $stmt->execute([
+            'id' => $id,
+        ]);
+
+        $threads = array_column($stmt->fetchAll(), null, 'id');
+        $threads = $this->addNumberOfMessages($threads);
+        $threads = $this->addTimestampOfLastMessage($threads);
+
+        return new ThreadObject(reset($threads));
+    }
+
+    public function getMessages(int $id): MessageCollection
+    {
+        $query = 'SELECT id, thread, watermark, author_name, author_emailaddress, timestamp';
+        $query.= ' FROM messages';
+        $query.= ' WHERE thread = :thread';
+        $query.= ' ORDER BY watermark ASC';
+
+        $stmt = $this->dbConnection->prepare($query);
+        $stmt->execute([
+            'thread' => $id,
+        ]);
+
+        return new MessageCollection($stmt->fetchAll());
     }
 }
