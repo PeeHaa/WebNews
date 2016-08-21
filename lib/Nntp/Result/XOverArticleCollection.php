@@ -2,14 +2,16 @@
 
 namespace PeeHaa\Nntp\Result;
 
+use PeeHaa\Nntp\Encoding\Converter;
+
 class XOverArticleCollection implements \Iterator
 {
     private $articles = [];
 
-    public function __construct(array $xOverArticles)
+    public function __construct(Converter $converter, array $xOverArticles)
     {
         foreach ($xOverArticles as $article) {
-            $this->articles[] = new XOverArticle($article);
+            $this->articles[] = new XOverArticle($converter, $article);
         }
     }
 
