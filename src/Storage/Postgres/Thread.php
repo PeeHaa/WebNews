@@ -37,11 +37,11 @@ class Thread
     {
         $query = 'SELECT thread';
         $query.= ' FROM messages';
-        $query.= ' WHERE id = :id';
+        $query.= ' WHERE message_id = :messageId';
 
         $stmt = $this->dbConnection->prepare($query);
         $stmt->execute([
-            'id' => $article->getReferences()[0],
+            'messageId' => $article->getReferences()[0],
         ]);
 
         return (int) $stmt->fetchColumn(0);
@@ -51,11 +51,11 @@ class Thread
     {
         $query = 'SELECT COUNT(id)';
         $query.= ' FROM messages';
-        $query.= ' WHERE id = :id';
+        $query.= ' WHERE message_id = :messageId';
 
         $stmt = $this->dbConnection->prepare($query);
         $stmt->execute([
-            'id' => $article->getMessageId(),
+            'messageId' => $article->getMessageId(),
         ]);
 
         return (bool) $stmt->fetchColumn(0);

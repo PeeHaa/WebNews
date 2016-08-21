@@ -17,15 +17,16 @@ class Article
     public function create(int $threadId, XOverArticle $article, ArticleResult $articleContent)
     {
         $query = 'INSERT INTO messages';
-        $query.= ' (id, thread, watermark, author_name, author_emailaddress, timestamp, bytes, lines, extra, headers';
-        $query.= ', body)';
+        $query.= ' (message_id, thread, watermark, author_name, author_emailaddress, timestamp, bytes, lines, extra';
+        $query.= ', headers, body)';
         $query.= ' VALUES';
-        $query.= ' (:id, :thread, :watermark, :authorName, :authorEmailAddress, :timestamp, :bytes, :lines, :extra';
-        $query.= ', :headers, :body)';
+        $query.= ' (:messageId, :thread, :watermark, :authorName, :authorEmailAddress, :timestamp, :bytes, :lines';
+        $query.= ', :extra, :headers, :body)';
 
         $stmt = $this->dbConnection->prepare($query);
-        $stmt->execute([
-            'id'                 => $article->getMessageId(),
+
+        $data = [
+            'messageId'          => $article->getMessageId(),
             'thread'             => $threadId,
             'watermark'          => $article->getWatermark(),
             'authorName'         => $article->getAuthorName(),
@@ -36,6 +37,8 @@ class Article
             'extra'              => $article->getExtraData(),
             'headers'            => $articleContent->getHeaders(),
             'body'               => $articleContent->getBody(),
-        ]);
+        ];
+
+        $stmt->execute($data);
     }
 }
