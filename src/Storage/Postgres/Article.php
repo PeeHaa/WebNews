@@ -4,6 +4,7 @@ namespace WebNews\Storage\Postgres;
 
 use PeeHaa\Nntp\Result\XOverArticle;
 use PeeHaa\Nntp\Result\Article as ArticleResult;
+use WebNews\Domain\MessageCollection;
 
 class Article
 {
@@ -40,5 +41,18 @@ class Article
         ];
 
         $stmt->execute($data);
+    }
+
+    public function getLatest(int $amount = 10): MessageCollection
+    {
+        $query = 'SELECT id, message_id, thread, watermark, author_name, author_emailaddress, timestamp, bytes, lines';
+        $query.= ', extra, headers, body';
+        $query.= ' FROM messages';
+        $query.= ' ORDER BY timestamp DESC';
+        $query.= ' LIMIT ' . $amount . ' OFFSET 0';
+
+        $stmt = $this->dbConnection->query($query);
+
+        return new MessageCollection($stmt->fetchAll());
     }
 }

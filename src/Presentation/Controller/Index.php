@@ -5,6 +5,7 @@ namespace WebNews\Presentation\Controller;
 use CodeCollab\Http\Response\Response;
 use WebNews\Presentation\Template\Html;
 use WebNews\Storage\Postgres\Group;
+use WebNews\Storage\Postgres\Article;
 
 class Index
 {
@@ -15,10 +16,11 @@ class Index
         $this->response = $response;
     }
 
-    public function index(Html $template, Group $group)
+    public function index(Html $template, Group $group, Article $article)
     {
         $this->response->setContent($template->renderPage('/index.phtml', [
             'groups' => $group->getAll(),
+            'latest' => $article->getLatest(),
         ]));
 
         return $this->response;

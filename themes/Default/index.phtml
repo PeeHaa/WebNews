@@ -33,6 +33,26 @@
                 </table>
             </div>
             <div class="col-md-6">
+                <?php if (count($this->latest)) { ?>
+                    <h2><?= $this->translate('page.groups.overview.latest.title'); ?></h2>
+                    <table class="thread-list table table-striped table-hover">
+                        <tbody>
+                            <?php foreach ($this->latest as $article) { ?>
+                                <tr>
+                                    <td>
+                                        <a class="thread-subject" href="/">Thread name here</a>
+                                        <br class="visible-xs">
+                                        <small class="text-muted">
+                                            <time-ago datetime="<?= $article->getTimestamp()->format('c'); ?>"><?= $article->getTimestamp()->format('M j, Y'); ?></time-ago>
+                                            -
+                                            <?= $this->escape($article->getAuthorName()); ?>
+                                        </small>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                    <?php } ?>
                 <h2>Todo</h2>
                 <p>Filters / search/ last messages here?</p>
             </div>
