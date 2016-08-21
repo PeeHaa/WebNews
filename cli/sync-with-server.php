@@ -14,6 +14,7 @@ use PeeHaa\Nntp\Command\XOver;
 use PeeHaa\Nntp\Result\XOverArticleCollection;
 use WebNews\Storage\Postgres\Thread;
 use WebNews\Storage\Postgres\Article;
+use PeeHaa\Nntp\Encoding\Utf8;
 use PeeHaa\Nntp\Result\InvalidResultException;
 use PeeHaa\Nntp\Command\Article as ArticleCommand;
 use PeeHaa\Nntp\Result\Article as ArticleContentResult;
@@ -59,6 +60,7 @@ function createThreads($articleResult, $articleContentResult, $threadStorage, $l
  */
 $threadStorage  = $auryn->make(Thread::class);
 $articleStorage = $auryn->make(Article::class);
+$converter      = new Utf8();
 
 foreach ($listResults as $groupIndex => $listResult) {
     if ($groupIndex < 3) {
@@ -83,7 +85,7 @@ foreach ($listResults as $groupIndex => $listResult) {
         $xOverResult = $client->sendCommand(new XOver($start, $start + 200));
 
         try {
-            $articleResults = new XOverArticleCollection($xOverResult->getData());
+            $articleResults = new XOverArticleCollection($converter, $xOverResult->getData());
         } catch (InvalidResultException $e) {
             var_dump('ERROR: Message could not be parsed.');
         }
@@ -97,7 +99,7 @@ foreach ($listResults as $groupIndex => $listResult) {
                 var_dump($articleResult->getWatermark() . ' :: ' . $articleResult->getSubject());
 
                 $article = $client->sendCommand(new ArticleCommand($articleResult->getWatermark()));
-                $articleContentResult = new ArticleContentResult($article->getData());
+                $articleContentResult = new ArticleContentResult($converter, $article->getData());
 
                 createThreads($articleResult, $articleContentResult, $threadStorage, $listResult, $articleStorage);
             } catch(\Throwable $e) {
