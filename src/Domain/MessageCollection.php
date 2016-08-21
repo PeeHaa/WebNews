@@ -2,7 +2,7 @@
 
 namespace WebNews\Domain;
 
-class MessageCollection implements \Iterator
+class MessageCollection implements \Iterator, \Countable
 {
     private $messages = [];
 
@@ -11,6 +11,11 @@ class MessageCollection implements \Iterator
         foreach ($messages as $message) {
             $this->messages[] = new Message($message);
         }
+    }
+
+    public function count(): int
+    {
+        return count($this->messages);
     }
 
     public function current(): Message
