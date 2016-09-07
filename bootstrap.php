@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 
 
+
 namespace WebNews;
 
 use Auryn\Injector as Auryn;
