@@ -2,13 +2,11 @@
 
 namespace WebNews\Cli;
 
-use Auryn\Injector;
 use PeeHaa\Nntp\Connection\Connection;
 use PeeHaa\Nntp\Endpoint\Plain;
 use PeeHaa\Nntp\Client;
-use PeeHaa\Nntp\Command\ListCommand;
-use PeeHaa\Nntp\Result\ListGroupCollection;
-use WebNews\Storage\Postgres\Group;
+use WebNews\Import\Group as GroupImport;
+use WebNews\Storage\Postgres\Group as GroupStorage;
 use PeeHaa\Nntp\Command\Group as GroupCommand;
 use PeeHaa\Nntp\Command\XOver;
 use PeeHaa\Nntp\Result\XOverArticleCollection;
@@ -28,14 +26,12 @@ $client     = new Client($connection);
 /**
  * Update groups
  */
-$listResponse = $client->sendCommand(new ListCommand());
-$listResults  = new ListGroupCollection($listResponse->getData());
 /** @var \Auryn\Injector $auryn */
-$groupStorage = $auryn->make(Group::class);
+$groupStorage = $auryn->make(GroupStorage::class);
 
-foreach ($listResults as $listResult) {
-    $groupStorage->upsert($listResult);
-}
+(new GroupImport($client, $groupStorage))->import();
+
+exit;
 
 /**
  * Create threads
