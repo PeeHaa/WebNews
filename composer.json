@@ -20,7 +20,7 @@
     },
     "prefer-stable": true,
     "require": {
-        "php": "^7",
+        "php": "^7.1",
         "codecollab/router": "^1",
         "codecollab/form": "^1",
         "codecollab/http": "^1",
