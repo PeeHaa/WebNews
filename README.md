@@ -4,7 +4,7 @@ News server web interface
 
 ## Requirements
 
-- PHP7+
+- PHP7.1+
 - Composer
 
 ## Installation
