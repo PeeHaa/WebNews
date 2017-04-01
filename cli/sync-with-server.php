@@ -5,6 +5,7 @@ namespace WebNews\Cli;
 use PeeHaa\Nntp\Connection\Connection;
 use PeeHaa\Nntp\Endpoint\Plain;
 use PeeHaa\Nntp\Client;
+use WebNews\Import\Article as ArticleImport;
 use WebNews\Import\Group as GroupImport;
 use WebNews\Storage\Postgres\Group as GroupStorage;
 use PeeHaa\Nntp\Command\Group as GroupCommand;
@@ -29,7 +30,15 @@ $client     = new Client($connection);
 /** @var \Auryn\Injector $auryn */
 $groupStorage = $auryn->make(GroupStorage::class);
 
-(new GroupImport($client, $groupStorage))->import();
+$groups = (new GroupImport($client, $groupStorage))->import();
+
+/**
+ * Import articles
+ */
+$threadStorage  = $auryn->make(Thread::class);
+$articleStorage = $auryn->make(Article::class);
+
+(new ArticleImport($client, $threadStorage, $articleStorage))->import($groups);
 
 exit;
 
@@ -58,7 +67,7 @@ $threadStorage  = $auryn->make(Thread::class);
 $articleStorage = $auryn->make(Article::class);
 $converter      = new Utf8();
 
-foreach ($listResults as $groupIndex => $listResult) {
+foreach ($groups as $groupIndex => $listResult) {
     if ($groupIndex < 3) {
         //continue;
     }

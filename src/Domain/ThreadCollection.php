@@ -18,12 +18,12 @@ class ThreadCollection implements \Iterator
         return current($this->threads);
     }
 
-    public function next()
+    public function next(): void
     {
         next($this->threads);
     }
 
-    public function key()
+    public function key(): ?int
     {
         return key($this->threads);
     }
@@ -33,7 +33,7 @@ class ThreadCollection implements \Iterator
         return array_key_exists($this->key(), $this->threads);
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         reset($this->threads);
     }

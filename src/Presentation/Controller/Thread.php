@@ -23,7 +23,7 @@ class Thread
         ThreadStorage $thread,
         string $selectedGroup,
         string $threadId
-    )
+    ): Response
     {
         if (!$group->exists($selectedGroup) || !$thread->exists((int) $threadId)) {
             $this->response->setContent($template->renderPage('/error/not-found.phtml'));

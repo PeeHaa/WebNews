@@ -24,7 +24,7 @@ class TokenSession implements Storage
         return $this->session->get($key);
     }
 
-    public function set(string $key, string $token)
+    public function set(string $key, string $token): void
     {
         $this->session->set($key, $token);
     }

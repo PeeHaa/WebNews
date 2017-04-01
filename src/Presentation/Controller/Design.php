@@ -14,7 +14,7 @@ class Design
         $this->response = $response;
     }
 
-    public function thread(Html $template)
+    public function thread(Html $template): Response
     {
         $this->response->setContent($template->renderPage('/design/thread.phtml'));
 

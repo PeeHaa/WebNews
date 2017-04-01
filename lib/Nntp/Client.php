@@ -31,7 +31,7 @@ class Client
                 $statusLine->getMessage()
             ));
         }
-
+//var_dump($statusLine, $this->getData());
         if ($statusLine->getStatusCode() === 211) {
             return new Response($statusLine);
         }

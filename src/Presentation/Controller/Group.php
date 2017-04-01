@@ -17,7 +17,7 @@ class Group
         $this->response = $response;
     }
 
-    public function showThreads(Html $template, GroupStorage $group, Thread $thread, string $selectedGroup)
+    public function showThreads(Html $template, GroupStorage $group, Thread $thread, string $selectedGroup): Response
     {
         if (!$group->exists($selectedGroup)) {
             $this->response->setContent($template->renderPage('/error/not-found.phtml'));

@@ -18,12 +18,12 @@ class GroupCollection implements \Iterator
         return current($this->groups);
     }
 
-    public function next()
+    public function next(): void
     {
         next($this->groups);
     }
 
-    public function key()
+    public function key(): ?int
     {
         return key($this->groups);
     }
@@ -33,7 +33,7 @@ class GroupCollection implements \Iterator
         return array_key_exists($this->key(), $this->groups);
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         reset($this->groups);
     }

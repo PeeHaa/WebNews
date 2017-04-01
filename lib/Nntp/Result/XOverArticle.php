@@ -29,7 +29,8 @@ class XOverArticle
     public function __construct(Converter $converter, string $xOverLine)
     {
         $this->converter = $converter;
-
+//var_dump($xOverLine);
+//die;
         $xOverInformation = explode("\t", $xOverLine);
 
         if (count($xOverInformation) !== 9 || !$xOverInformation[3]) {

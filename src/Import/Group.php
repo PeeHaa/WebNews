@@ -19,7 +19,7 @@ class Group
         $this->storage = $storage;
     }
 
-    public function import()
+    public function import(): ListGroupCollection
     {
         $response = $this->client->sendCommand(new ListCommand());
 
@@ -28,5 +28,7 @@ class Group
         foreach ($results as $result) {
             $this->storage->upsert($result);
         }
+
+        return $results;
     }
 }

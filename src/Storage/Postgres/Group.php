@@ -15,7 +15,7 @@ class Group
     }
 
     // lazy upsert
-    public function upsert(ListGroup $group)
+    public function upsert(ListGroup $group): void
     {
         $query = 'SELECT COUNT(name)';
         $query.= ' FROM groups';
@@ -33,7 +33,7 @@ class Group
         }
     }
 
-    private function create(ListGroup $group)
+    private function create(ListGroup $group): void
     {
         $query = 'INSERT INTO groups';
         $query.= ' (name, low_watermark, high_watermark, is_writable, is_moderated)';
@@ -50,7 +50,7 @@ class Group
         ]);
     }
 
-    private function update(ListGroup $group)
+    private function update(ListGroup $group): void
     {
         $query = 'UPDATE groups';
         $query.= ' SET low_watermark = :lowWatermark, high_watermark = :highWatermark, is_writable = :isWritable';

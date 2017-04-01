@@ -16,7 +16,7 @@ class Index
         $this->response = $response;
     }
 
-    public function index(Html $template, Group $group, Article $article)
+    public function index(Html $template, Group $group, Article $article): Response
     {
         $this->response->setContent($template->renderPage('/index.phtml', [
             'groups' => $group->getAll(),

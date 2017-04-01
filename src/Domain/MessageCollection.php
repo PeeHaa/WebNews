@@ -23,12 +23,12 @@ class MessageCollection implements \Iterator, \Countable
         return current($this->messages);
     }
 
-    public function next()
+    public function next(): void
     {
         next($this->messages);
     }
 
-    public function key()
+    public function key(): ?int
     {
         return key($this->messages);
     }
@@ -38,7 +38,7 @@ class MessageCollection implements \Iterator, \Countable
         return array_key_exists($this->key(), $this->messages);
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         reset($this->messages);
     }

@@ -15,7 +15,7 @@ class Error
         $this->response = $response;
     }
 
-    public function notFound(Html $template)
+    public function notFound(Html $template): Response
     {
         $this->response->setContent($template->renderPage('/error/not-found.phtml'));
         $this->response->setStatusCode(StatusCode::NOT_FOUND);
@@ -23,7 +23,7 @@ class Error
         return $this->response;
     }
 
-    public function methodNotAllowed(Html $template)
+    public function methodNotAllowed(Html $template): Response
     {
         $this->response->setContent($template->renderPage('/error/not-found.phtml'));
         $this->response->setStatusCode(StatusCode::METHOD_NOT_ALLOWED);

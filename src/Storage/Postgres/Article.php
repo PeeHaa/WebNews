@@ -15,7 +15,7 @@ class Article
         $this->dbConnection = $dbConnection;
     }
 
-    public function create(int $threadId, XOverArticle $article, ArticleResult $articleContent)
+    public function create(int $threadId, XOverArticle $article, ArticleResult $articleContent): void
     {
         $query = 'INSERT INTO messages';
         $query.= ' (message_id, thread, watermark, author_name, author_emailaddress, timestamp, bytes, lines, extra';
