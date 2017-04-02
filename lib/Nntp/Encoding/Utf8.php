@@ -18,6 +18,8 @@ class Utf8 implements Converter
 
     public function convert(string $data): string
     {
+        return $data;
+
         if ($this->isValidUtf8($data)) {
             return $data;
         }
