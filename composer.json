@@ -28,9 +28,15 @@
         "codecollab/template": "^1",
         "codecollab/i18n": "^1",
         "rdlowrey/auryn": "^1",
-        "peehaa/minifine": "^2"
+        "peehaa/minifine": "^2",
+        "league/climate": "^3"
     },
     "require-dev": {
         "phpunit/phpunit": "^5.4"
+    },
+    "scripts": {
+        "post-create-project-cmd": [
+            "php cli/install.php"
+        ]
     }
 }
